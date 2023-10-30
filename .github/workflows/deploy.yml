@@ -1,0 +1,39 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v4
+          - name: Set up Python
+            uses: actions/setup-python@v4
+            with:
+              python-version: '3.9'
+
+          - name: deploy python code
+            uses: appleboy/scp-action@master
+            with:
+              host: ${{ secrets.HOST }}
+              username: ${{ secrets.USERNAME }}
+              key: ${{ secrets.KEY }}
+              source: "./*"
+              target: "/home/ubuntu/machinelearning"
+              strip_components: 1
+
+          - name: run scrpt
+            uses: appleboy/ssh-action@master
+            with:
+                host: ${{ secrets.HOST }}
+                username: ${{ secrets.USERNAME }}
+                key: ${{ secrets.KEY }}
+                script: |
+                    cd machinelearning
+                    pip freeze > requirements.txt
+                    pip install -r requirements.txt
+                    python3 main.py
+
