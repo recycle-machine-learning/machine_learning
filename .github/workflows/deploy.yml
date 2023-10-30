@@ -21,9 +21,8 @@ jobs:
               host: ${{ secrets.HOST }}
               username: ${{ secrets.USERNAME }}
               key: ${{ secrets.KEY }}
-              source: "./project"
+              source: "./project/"
               target: "/home/ubuntu/machinelearning"
-              strip_components: 1
 
           - name: run scrpt
             uses: appleboy/ssh-action@master
