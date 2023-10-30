@@ -23,6 +23,7 @@ jobs:
               key: ${{ secrets.KEY }}
               source: "./project/"
               target: "/home/ubuntu/machinelearning"
+              strip_components: 2
 
           - name: run scrpt
             uses: appleboy/ssh-action@master
