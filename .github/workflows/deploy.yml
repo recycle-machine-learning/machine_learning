@@ -21,7 +21,7 @@ jobs:
               host: ${{ secrets.HOST }}
               username: ${{ secrets.USERNAME }}
               key: ${{ secrets.KEY }}
-              source: "./*"
+              source: "./project"
               target: "/home/ubuntu/machinelearning"
               strip_components: 1
 
@@ -35,5 +35,5 @@ jobs:
                     cd machinelearning
                     pip freeze > requirements.txt
                     pip install -r requirements.txt
-                    python3 main.py
+                    nohup python3 main.py &
 
