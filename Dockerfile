@@ -1,4 +1,4 @@
-FROM python:3.12
+FROM python:3.11
 
 COPY ./project .
 RUN pip install --upgrade pip
