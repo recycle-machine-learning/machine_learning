@@ -35,17 +35,17 @@ class MaxPooling:
         # 패딩 적용
         x_padded = torch.nn.functional.pad(x, (self.padding, self.padding, self.padding, self.padding))
 
-        print()
+        print(x_padded.shape)
 
         max_value = torch.zeros(x_padded.shape[0], x_padded.shape[1],
-                                (x_padded.shape[2] - self.kernel_size + 2 * self.padding) // self.stride,
-                                (x_padded.shape[3] - self.kernel_size + 2 * self.padding) // self.stride)
+                                (x_padded.shape[2] - self.kernel_size) // self.stride + 1,
+                                (x_padded.shape[3] - self.kernel_size) // self.stride + 1)
+        print(max_value)
         self.max_indices = torch.zeros_like(x)
 
         for i in range(max_value.shape[2]):
             for j in range(max_value.shape[3]):
                 max_value[:, :, i, j] = self.extract_max_indices(x_padded, i, j)
-
         return max_value
 
     def extract_max_indices(self, x_padded: Tensor, i, j):
@@ -64,4 +64,4 @@ class MaxPooling:
         """
         최댓값은 해당 위치값, 나머지는 0
         """
-        return dout * self.max_indices
+        return torch.mul(self.x, self.max_indices)
