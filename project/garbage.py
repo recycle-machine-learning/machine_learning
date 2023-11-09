@@ -11,11 +11,6 @@ def load_data():
     y_train = []
     x_test = []
     y_test = []
-    # for dir in file_list:
-    #     image_file = image_resize.resize_dataset_image(path='./project/dataset/garbage_classfication/'+dir)
-    #     image_file = np.reshape(image_file, (-1, 3, 128, 128))[:100]
-    #     x_train.append(image_file)
-    #     y_train.append([garbage_class.index(dir)] * len(image_file))
     with mp.Pool(processes=mp.cpu_count()) as pool:
         print(file_list)
         pool_result = pool.starmap(load_data_single_class, zip(file_list, [garbage_class.index(file) for file in file_list]))
