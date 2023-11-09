@@ -24,6 +24,8 @@ class CNN(nn.Module):
 
         self.fc1 = nn.Linear(16 * 16 * 64, 12, bias=True)
 
+        self.drop = nn.Dropout(0.25)
+
         nn.init.xavier_uniform_(self.fc1.weight)
 
     def forward(self, x):
