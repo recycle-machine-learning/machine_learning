@@ -24,7 +24,7 @@ class softmax: #with loss
         return cross_entropy
 
     def s_forward(self, x, y): #순전파
-        self.x = softmax(x)
+        self.x = self.softmax(x)
         self.y = y
         self.loss = self.s_cross_entropy(x, y)
         return self.loss
@@ -33,3 +33,4 @@ class softmax: #with loss
         batch = self.x.shape[0]
         dx = (self.x-self.y)/batch #dx= softmax - label
         return dx
+
