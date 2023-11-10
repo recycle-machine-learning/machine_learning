@@ -4,7 +4,7 @@ import numpy as np
 import multiprocessing as mp
 
 def load_data():
-    listdir = os.listdir('./project/dataset/garbage_classfication')
+    listdir = os.listdir('dataset/garbage_classification')
     file_list = [file for file in listdir if not file.startswith('.DS_Store')]
     garbage_class = file_list
     x_train = []
@@ -34,7 +34,7 @@ def load_data():
     return x_train, y_train, x_test, y_test
 
 def load_data_single_class(path,class_idx):
-    image_file = image_resize.resize_dataset_image(path='./project/dataset/garbage_classfication/' + path, target_height=64, target_width=64)
+    image_file = image_resize.resize_dataset_image(path='./dataset/garbage_classification/' + path, target_height=64, target_width=64)
     image_file = np.reshape(image_file, (-1, 3, 64, 64))
     # image_file = image_file.astype('float32') / 255
     target = np.array([class_idx] * len(image_file))
