@@ -18,13 +18,15 @@ def save_csv(dataset_dir='dataset/garbage_classification'):
 
         img_list = natsort.natsorted(os.listdir(joined_path))
 
-        train_join_list = [os.path.join(path, img) for img in img_list[:-10]]
+        ratio = 0.9
+        train_length = int(len(img_list) * ratio)
+        train_join_list = [os.path.join(path, img) for img in img_list[:train_length]]
         train_name_list.extend(train_join_list)
-        train_label_list.extend([i] * (len(img_list) - 10))
+        train_label_list.extend([i] * train_length)
 
-        test_join_list = [os.path.join(path, img) for img in img_list[-10:]]
+        test_join_list = [os.path.join(path, img) for img in img_list[train_length:]]
         test_name_list.extend(test_join_list)
-        test_label_list.extend([i] * 10)
+        test_label_list.extend([i] * (len(img_list) - train_length))
 
     train = {'file_name': train_name_list,
              'label': train_label_list}

@@ -13,7 +13,7 @@ def _collate_fn(batch):
     batch = filter(lambda x: x is not None, batch)
     images, labels = zip(*batch)
 
-    transform = ResizeImage(resize_type='expand')
+    transform = ResizeImage(size=64, resize_type='expand')
 
     resized_images = []
     for img in images:
@@ -21,6 +21,6 @@ def _collate_fn(batch):
         resized_images.append(transformed_img)
 
     img_tensors = torch.cat([t.unsqueeze(0) for t in resized_images], 0)
-    label_tensors = torch.tensor(labels)
+    label_tensors = torch.cat([t.unsqueeze(0) for t in labels], 0)
 
     return img_tensors, label_tensors

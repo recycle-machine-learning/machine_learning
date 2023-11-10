@@ -18,11 +18,11 @@ class CNN(nn.Module):
         # Image Shape = (?, 64, 64, 16)
         # CONV = (?, 64, 64, 32)
         # POOL = (?, 32, 32, 32)
-        self.conv2 = nn.Conv2d(in_channels=16, out_channels=64, kernel_size=3, stride=1,padding=1)
-        self.bn2 = nn.BatchNorm2d(64)
+        self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=1,padding=1)
+        self.bn2 = nn.BatchNorm2d(32)
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        self.fc1 = nn.Linear(32 * 32 * 64, 12, bias=True)
+        self.fc1 = nn.Linear(16 * 16 * 32, 12, bias=True)
 
         self.drop = nn.Dropout(0.25)
 
