@@ -21,5 +21,6 @@ def _collate_fn(batch):
         resized_images.append(transformed_img)
 
     img_tensors = torch.cat([t.unsqueeze(0) for t in resized_images], 0)
+    label_tensors = torch.tensor(labels)
 
-    return img_tensors, labels
+    return img_tensors, label_tensors
