@@ -1,9 +1,7 @@
 import time
 import torch
 import torch.nn as nn
-from image_resize import *
-import garbage
-import os
+from project.dataloader import image_load
 
 from project.cnn import CNN
 
@@ -21,7 +19,7 @@ if __name__ == '__main__':
 
     load_start = time.time()
 
-    x_train, y_train, x_test, y_test = garbage.load_data()
+    x_train, y_train, x_test, y_test = image_load.load_data()
     x_train = torch.from_numpy(x_train).float()
     y_train = torch.from_numpy(y_train).long()
     x_test = torch.from_numpy(x_test).float().to(device)

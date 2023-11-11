@@ -1,9 +1,11 @@
-from PIL import Image
-from project.resize_image import ResizeImage
 import os
+
+from PIL import Image
 from torchvision.transforms.functional import to_pil_image
 
-img_dir = '../project/dataset/garbage_classification/battery'
+from project.datatransform.resize_image import ResizeImage
+
+img_dir = '../../project/dataset/garbage_classification/battery'
 img_labels = ['battery1.jpg', 'battery2.jpg']
 
 img_list = []
@@ -33,4 +35,3 @@ for i, img in enumerate(img_list):
     print("img {0}: {1}".format(i, resized_img.shape))
     pil_img = to_pil_image(resized_img)
     pil_img.show()
-
