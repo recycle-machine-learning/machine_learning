@@ -1,6 +1,5 @@
 import torch
 import torchvision.transforms as transforms
-from torchvision.transforms import Resize
 
 
 class ResizeImage(object):
@@ -22,9 +21,9 @@ class ResizeImage(object):
         w, h = img.size
         # 이미지의 긴 부분을 self.size로 맞춤
         if w > h:
-            resize = Resize((int(self.size * h / w), self.size))
+            resize = transforms.Resize((int(self.size * h / w), self.size))
         else:
-            resize = Resize((self.size, int(self.size * w / h)))
+            resize = transforms.Resize((self.size, int(self.size * w / h)))
 
         resized_img = resize(img)
         w, h = resized_img.size
@@ -49,7 +48,7 @@ class ResizeImage(object):
 
     def crush_resize(self, img):
         # 비율 상관없이 찌그러뜨림
-        resize = Resize((self.size, self.size))
+        resize = transforms.Resize((self.size, self.size))
         resized_img = resize(img)
         return self.toTensor(resized_img)
         

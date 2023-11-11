@@ -1,15 +1,16 @@
 import unittest
-from project.layers.convolution import Convolution
 import torch
 import numpy as np
+
+from project.layers.convolution import Convolution
 
 
 class ConvolutionTestCase(unittest.TestCase):
     def setUp(self):
-        x_shape = (10, 3, 16, 16)
+        x_shape = (50, 3, 16, 16)
         self.x = torch.randn(x_shape, dtype=torch.float64)
 
-        w_shape = (50, 3, 2, 2)
+        w_shape = (10, 3, 2, 2)
         self.w = torch.randn(w_shape, dtype=torch.float64)
 
         b_shape = (10, 1, 1)
@@ -40,7 +41,7 @@ class ConvolutionTestCase(unittest.TestCase):
                             output[on, ofn, oh, ow] += np.sum(x[on, oc, oh:oh + fh, ow:ow + fw] * wt[ofn, oc])
                 output[on, ofn] += b[ofn]
 
-        #실수 오차 발생
+        # 실수 오차 발생
         self.assertTrue(np.allclose(numpy, output, rtol=1e-05, atol=1e-08))
 
 
