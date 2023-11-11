@@ -12,9 +12,12 @@ class MaxPooling:
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
+        self.unfold = nn.Unfold(kernel_size=self.kernel_size, stride=self.stride, padding=self.padding)
         self.x = None
-        self.pooling = None
-        self.max_indices = None
+        self.x_unfold = None
+        self.x_unfold_permute = None
+        self.x_unfold_max_values = None
+
 
     def forward(self, x: Tensor):
         """
@@ -31,37 +34,33 @@ class MaxPooling:
 
         forward : padding -> max
         """
+        x_unfold = self.unfold(x)
+        x_unfold_permute = (
+            x_unfold.view(x.shape[0], x.shape[1], self.kernel_size * self.kernel_size, -1).permute(0, 1, 3, 2))
+        x_unfold_max_values = torch.max(x_unfold_permute, dim=3).values
+        pooling = x_unfold_max_values.view(x.shape[0], x.shape[1], x.shape[2] // self.stride, x.shape[3] // self.stride)
+
         self.x = x
-        # 패딩 적용
-        x_padded = torch.nn.functional.pad(x, (self.padding, self.padding, self.padding, self.padding))
+        self.x_unfold = x_unfold
+        self.x_unfold_permute = x_unfold_permute
+        self.x_unfold_max_values = x_unfold_max_values
 
-        print(x_padded.shape)
-
-        max_value = torch.zeros(x_padded.shape[0], x_padded.shape[1],
-                                (x_padded.shape[2] - self.kernel_size) // self.stride + 1,
-                                (x_padded.shape[3] - self.kernel_size) // self.stride + 1)
-        print(max_value)
-        self.max_indices = torch.zeros_like(x)
-
-        for i in range(max_value.shape[2]):
-            for j in range(max_value.shape[3]):
-                max_value[:, :, i, j] = self.extract_max_indices(x_padded, i, j)
-        return max_value
-
-    def extract_max_indices(self, x_padded: Tensor, i, j):
-        max_idx1, max_idx2 = 0, 0
-        max_value = 0.0
-        for d1 in range(i * self.stride, i * self.stride + self.kernel_size):
-            for d2 in range(j * self.stride, j * self.stride + self.kernel_size):
-                if x_padded[:, :, d1, d2] > max_value:
-                    max_value = x_padded[:, :, d1, d2]
-                    max_idx1, max_idx2 = d1, d2
-        if max_value != 0:
-            self.max_indices[:, :, max_idx1 - self.padding, max_idx2 - self.padding] = 1
-        return max_value
+        return pooling
 
     def backward(self, dout: Tensor):
         """
-        최댓값은 해당 위치값, 나머지는 0
+        최댓값 위치에 dout 값, 나머지는 0
         """
-        return torch.mul(self.x, self.max_indices)
+
+        fold = nn.Fold(output_size=(self.x.shape[2],self.x.shape[3]), kernel_size=self.kernel_size, stride=self.stride,
+                       padding=self.padding)
+
+        mask = (self.x_unfold_permute == self.x_unfold_max_values.unsqueeze(-1)).float()
+        dout_expand = (dout.view(self.x_unfold_permute.shape[0],self.x_unfold_permute.shape[1],self.x_unfold_permute.shape[2],1)
+                       .expand(self.x_unfold_permute.shape))
+        mask_dout = mask * dout_expand
+        mask_dout_permute = mask_dout.permute(0, 1, 3, 2)
+        mask_dout_permute_view = mask_dout_permute.view(self.x_unfold.shape[0],self.x_unfold.shape[1],self.x_unfold.shape[2])
+        mask_dout_fold = fold(mask_dout_permute_view)
+
+        return mask_dout_fold
