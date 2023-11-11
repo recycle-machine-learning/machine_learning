@@ -48,22 +48,3 @@ class Convolution:
         fold = Fold(output_size=2, kernel_size=fw, padding=self.padding, stride=self.stride)
         dx = fold(col)
         return dx
-
-
-if __name__ == '__main__':
-    x_shape = (1, 1, 3, 3)
-    x = torch.randint(0, 5, x_shape).type(torch.FloatTensor)
-    print(x.shape)
-
-    w_shape = (2, 1, 2, 2)
-    w = torch.randint(0, 5, w_shape).type(torch.FloatTensor)
-    print(w.shape)
-
-    b = 1
-    print(b)
-
-    c = Convolution(w, b)
-    c.forward(x)
-
-    # c.backward()
-
