@@ -31,7 +31,7 @@ class Convolution:
         self.col = col
         self.col_w = col_w
 
-        y = torch.matmul(col, col_w) + self.b
+        y = torch.matmul(col, col_w) + self.b.permute(2, 1, 0)
         y = y.view(n, out_h, out_w, -1).permute(0, 3, 1, 2)
         return y
 
