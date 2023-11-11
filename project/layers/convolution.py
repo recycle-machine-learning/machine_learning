@@ -43,7 +43,7 @@ class Convolution:
         self.dw = torch.matmul(self.col.T, dy)
         self.dw = self.dw.permute(1, 0).view(fn, c, fh, fw)
 
-        col = torch.matmul(dy, self.col_w.T)
+        col = torch.matmul(dy, self.col_w.T).permute(0, 2, 1)
 
         fold = Fold(output_size=2, kernel_size=fw, padding=self.padding, stride=self.stride)
         dx = fold(col)
