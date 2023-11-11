@@ -26,16 +26,18 @@ class CNN(nn.Module):
 
         self.drop = nn.Dropout(0.25)
 
+        self.relu = relu.Relu()
+
         nn.init.xavier_uniform_(self.fc1.weight)
 
     def forward(self, x):
         out = self.conv1(x)
         out = self.bn1(out)
-        out = relu.relu(out)
+        out = self.relu.forward(out)
         out = self.pool1(out)
         out = self.conv2(out)
         out = self.bn2(out)
-        out = relu.relu(out)
+        out = self.relu.forward(out)
         out = self.pool2(out)
         out = out.view(out.size(0), -1)
         out = self.fc1(out)
