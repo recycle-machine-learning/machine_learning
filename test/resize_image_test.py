@@ -3,7 +3,7 @@ from project.resize_image import ResizeImage
 import os
 from torchvision.transforms.functional import to_pil_image
 
-img_dir = '../project/dataset/garbage_classfication/battery'
+img_dir = '../project/dataset/garbage_classification/battery'
 img_labels = ['battery1.jpg', 'battery2.jpg']
 
 img_list = []
