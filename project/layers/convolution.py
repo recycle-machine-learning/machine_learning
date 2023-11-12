@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from torch.nn import Fold, Unfold
 
@@ -22,7 +23,7 @@ class Convolution:
         out_h = int(1 + (h + 2 * self.padding - fh) / self.stride)
         out_w = int(1 + (w + 2 * self.padding - fw) / self.stride)
 
-        unfold = Unfold(kernel_size=fw, padding=self.padding, stride=self.stride)
+        unfold = Unfold(kernel_size=(fh, fw), padding=self.padding, stride=self.stride)
         col = unfold(x).permute(0, 2, 1)
         col_w = self.w.view(fn, -1).T
 
@@ -36,14 +37,18 @@ class Convolution:
 
     def backward(self, dy):
         fn, c, fh, fw = self.w.shape
-        dy = dy.permute(0, 2, 3, 1).view(-1, fn)
+        dy = dy.permute(0, 2, 3, 1).reshape(-1, fn)
 
         self.db = torch.sum(dy, dim=0)
-        self.dw = torch.matmul(self.col.T, dy)
-        self.dw = self.dw.permute(1, 0).view(fn, c, fh, fw)
 
-        col = torch.matmul(dy, self.col_w.T).permute(0, 2, 1)
+        reshape_col = self.col.reshape(-1, c * fh * fw)
+        mul = torch.matmul(reshape_col.T, dy)
+        self.dw = mul.permute(1, 0).view(fn, c, fh, fw)
 
-        fold = Fold(output_size=2, kernel_size=fw, padding=self.padding, stride=self.stride)
+        col = torch.matmul(dy, self.col_w.T)
+        col = col.view(self.col.shape).permute(0, 2, 1)
+
+        n, c, h, w = self.x.shape
+        fold = Fold(output_size=(h, w), kernel_size=(fh, fw), padding=self.padding, stride=self.stride)
         dx = fold(col)
         return dx
