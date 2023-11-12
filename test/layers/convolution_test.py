@@ -48,12 +48,37 @@ class ConvolutionTestCase(unittest.TestCase):
         y = self.c.forward(self.x)
 
         dy_shape = y.shape
-        dy = torch.randint(0, 5, dy_shape, dtype=torch.float64)
+        dy = torch.randn(dy_shape, dtype=torch.float64)
 
         backward = self.c.backward(dy)
         numpy = backward.numpy()
 
-        print(numpy)
+        n, c, h, w = self.x.shape
+        fn, c, fh, fw = self.w.shape
+
+        x = self.x.numpy()
+        wt = self.w.numpy()
+        numpy_dy = dy.numpy()
+
+        reversed_w = np.flip(wt, axis=(2, 3))
+
+        pad_h, pad_w = fh - 1, fw - 1
+        pad_width = ((0, 0), (0, 0), (pad_h, pad_h), (pad_w, pad_w))
+        padded_dy = np.pad(numpy_dy, pad_width, mode='constant')
+
+        output = np.zeros(x.shape, dtype=np.float64)
+        for dn in range(n):
+            for dfn in range(fn):
+                for dc in range(c):
+                    for dh in range(h):
+                        for dw in range(w):
+                            output[dn, dc, dh, dw] += np.sum(padded_dy[dn, dfn, dh:dh + fh, dw:dw + fw] * reversed_w[dfn, dc])
+
+        # print(reversed_w)
+        # print(numpy_dy)
+        # print(numpy)
+        # print(output)
+        self.assertTrue(np.allclose(numpy, output, rtol=1e-05, atol=1e-08))
 
 
 if __name__ == '__main__':
