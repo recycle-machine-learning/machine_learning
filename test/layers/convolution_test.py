@@ -1,19 +1,20 @@
 import unittest
-from project.layers.convolution import Convolution
 import torch
 import numpy as np
+
+from project.layers.convolution import Convolution
 
 
 class ConvolutionTestCase(unittest.TestCase):
     def setUp(self):
-        x_shape = (10, 3, 16, 16)
-        self.x = torch.randn(x_shape, dtype=torch.float64)
+        x_shape = (5, 2, 5, 5)
+        self.x = torch.randint(0, 5, x_shape, dtype=torch.float64)
 
-        w_shape = (50, 3, 2, 2)
-        self.w = torch.randn(w_shape, dtype=torch.float64)
+        w_shape = (7, 2, 3, 3)
+        self.w = torch.randint(0, 5, w_shape, dtype=torch.float64)
 
-        b_shape = (10, 1, 1)
-        self.b = torch.randn(b_shape, dtype=torch.float64)
+        b_shape = (7, 1, 1)
+        self.b = torch.randint(0, 5, b_shape, dtype=torch.float64)
 
         self.c = Convolution(self.w, self.b)
 
@@ -40,8 +41,19 @@ class ConvolutionTestCase(unittest.TestCase):
                             output[on, ofn, oh, ow] += np.sum(x[on, oc, oh:oh + fh, ow:ow + fw] * wt[ofn, oc])
                 output[on, ofn] += b[ofn]
 
-        #실수 오차 발생
+        # 실수 오차 발생
         self.assertTrue(np.allclose(numpy, output, rtol=1e-05, atol=1e-08))
+
+    def test_backward(self):
+        y = self.c.forward(self.x)
+
+        dy_shape = y.shape
+        dy = torch.randint(0, 5, dy_shape, dtype=torch.float64)
+
+        backward = self.c.backward(dy)
+        numpy = backward.numpy()
+
+        print(numpy)
 
 
 if __name__ == '__main__':
