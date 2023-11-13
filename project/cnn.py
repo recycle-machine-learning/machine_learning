@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from project.layers import relu, pooling, convolution
+from project.layers import relu, pooling, convolution, affine
 
 
 class CNN(nn.Module):
@@ -26,7 +26,7 @@ class CNN(nn.Module):
         self.pool2_test = pooling.MaxPooling(kernel_size=2, stride=2, padding=0)
 
         self.fc1 = nn.Linear(16 * 16 * 32, 12, bias=True)
-
+        self.fc1_test = affine.Affine(16 * 16 * 32, 12, bias=True)
         self.drop = nn.Dropout(0.25)
 
         self.relu = relu.Relu()
@@ -34,8 +34,8 @@ class CNN(nn.Module):
         nn.init.xavier_uniform_(self.fc1.weight)
 
     def forward(self, x):
-        # out = self.conv1(x)
-        out = self.conv1_test.forward(x)
+        out = self.conv1(x)
+        # out = self.conv1_test.forward(x)
         out = self.bn1(out)
         out = self.relu.forward(out)
         out = self.pool1(out)
@@ -45,6 +45,7 @@ class CNN(nn.Module):
         out = self.relu.forward(out)
         out = self.pool2(out)
         # out = self.pool2_test.forward(out)
-        out = out.reshape(out.size(0), -1)
-        out = self.fc1(out)
+        # out = out.reshape(out.size(0), -1)
+        # out = self.fc1(out)
+        out = self.fc1_test.forward(out)
         return out
