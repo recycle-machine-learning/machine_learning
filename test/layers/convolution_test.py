@@ -16,7 +16,9 @@ class ConvolutionTestCase(unittest.TestCase):
         b_shape = (7, 1, 1)
         self.b = torch.randint(0, 5, b_shape, dtype=torch.float64)
 
-        self.c = Convolution(self.w, self.b)
+        self.c = Convolution(2, 7, 3, 1, 0)
+        self.c.weight = self.w
+        self.c.bias = self.b
 
     def test_forward(self):
         forward = self.c.forward(self.x)
@@ -48,7 +50,7 @@ class ConvolutionTestCase(unittest.TestCase):
         y = self.c.forward(self.x)
 
         dy_shape = y.shape
-        dy = torch.randn(dy_shape, dtype=torch.float64)
+        dy = torch.randint(0, 5, dy_shape, dtype=torch.float64)
 
         backward = self.c.backward(dy)
         numpy = backward.numpy()
@@ -72,14 +74,10 @@ class ConvolutionTestCase(unittest.TestCase):
                 for dc in range(c):
                     for dh in range(h):
                         for dw in range(w):
-                            output[dn, dc, dh, dw] += np.sum(padded_dy[dn, dfn, dh:dh + fh, dw:dw + fw] * reversed_w[dfn, dc])
+                            output[dn, dc, dh, dw] += np.sum(
+                                padded_dy[dn, dfn, dh:dh + fh, dw:dw + fw] * reversed_w[dfn, dc])
 
-        # print(reversed_w)
-        # print(numpy_dy)
-        # print(numpy)
-        # print(output)
         self.assertTrue(np.allclose(numpy, output, rtol=1e-05, atol=1e-08))
-
 
 if __name__ == '__main__':
     unittest.main()
