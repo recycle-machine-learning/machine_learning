@@ -1,54 +1,69 @@
-import torch
-import torchvision.transforms as transforms
+import numpy as np
+from PIL import Image
 
 
 class ResizeImage(object):
-    def __init__(self, channel=3, size=128, resize_type='expand'):
-        self.toTensor = transforms.ToTensor()
+    def __init__(self, channel=3, size=64, transform=None, resize_type='expand', normalize=True):
+        self.transform = transform
         self.channel = channel
         self.size = size
         self.resize_type = resize_type
+        self.normalize = normalize
 
     def __call__(self, img):
         if self.resize_type == 'expand':
-            return self.pad_expand(img)
+            img = self.pad_expand(img)
         elif self.resize_type == 'crop':
-            return self.center_crop(img)
+            img = self.center_crop(img)
         elif self.resize_type == 'crush':
-            return self.crush_resize(img)
+            img = self.crush_resize(img)
 
-    def pad_expand(self, img):
+        if self.normalize:
+            img_numpy = img.astype(np.float64) / 255
+
+        if self.transform:
+            return self.transform(img)
+        return img
+
+    def pad_expand(self, img: Image.Image) -> np.ndarray:
+        # 이미지의 긴 부분을 self.size에 맞춤
+        img.thumbnail((self.size, self.size))
         w, h = img.size
-        # 이미지의 긴 부분을 self.size로 맞춤
-        if w > h:
-            resize = transforms.Resize((int(self.size * h / w), self.size))
-        else:
-            resize = transforms.Resize((self.size, int(self.size * w / h)))
 
-        resized_img = resize(img)
-        w, h = resized_img.size
-        tensor_img = self.toTensor(resized_img)
+        img_padding = Image.new("RGB", (self.size, self.size), color=0)
+        img_padding.paste(img, (0, 0))
+        img_padding = np.array(img_padding)
+        print(img_padding.shape)
 
-        pad_img = torch.FloatTensor(self.channel, self.size, self.size).fill_(0)
+        img = np.array(img)
+
         # 남는 공간을 마지막 행(열)을 확장시켜 채움
         if w > h:
-            pad_img[:, :h, :] = tensor_img  # bottom pad
-            pad_img[:, h:, :] = tensor_img[:, h - 1, :].unsqueeze(1).expand(self.channel, self.size - h, w)
+            img_padding[h:] = img[h - 1]
         else:
-            pad_img[:, :, :w] = tensor_img  # right pad
-            pad_img[:, :, w:] = tensor_img[:, :, w - 1].unsqueeze(2).expand(self.channel, h, self.size - w)
+            img_padding[:, w:] = img[:, w - 1, np.newaxis]
 
-        return pad_img
+        return img_padding
 
-    def center_crop(self, img):
+    def center_crop(self, img: Image.Image) -> np.ndarray:
         # 가운데 정사각형 공간만큼 맞춰 자름
-        crop = transforms.CenterCrop(self.size)
-        cropped_img = crop(img)
-        return self.toTensor(cropped_img)
+        w, h = img.size
 
-    def crush_resize(self, img):
+        if w > h:
+            img.thumbnail((w, self.size))
+        else:
+            img.thumbnail((self.size, h))
+
+        w, h = img.size
+        left = (w - self.size) // 2
+        top = (h - self.size) // 2
+        right = left + self.size
+        bottom = top + self.size
+
+        img_cropped = img.crop((left, top, right, bottom))
+        return np.array(img_cropped)
+
+    def crush_resize(self, img: Image.Image) -> np.ndarray:
         # 비율 상관없이 찌그러뜨림
-        resize = transforms.Resize((self.size, self.size))
-        resized_img = resize(img)
-        return self.toTensor(resized_img)
-        
+        img_resized = img.resize((self.size, self.size))
+        return np.array(img_resized)
