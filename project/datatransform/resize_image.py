@@ -33,7 +33,6 @@ class ResizeImage(object):
         img_padding = Image.new("RGB", (self.size, self.size), color=0)
         img_padding.paste(img, (0, 0))
         img_padding = np.array(img_padding)
-        print(img_padding.shape)
 
         img = np.array(img)
 

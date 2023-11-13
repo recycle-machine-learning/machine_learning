@@ -11,7 +11,7 @@ def resize_dataset_image(path, target_height=128, target_width=128):
     image_ary = []
 
     for image in image_list:
-        # img = Image.open(path + '/' + image).convert('RGB').resize((target_height, target_width))
+        image = Image.open(path + '/' + image).convert('RGB')
         # img_np = np.array(img)
 
         resize = ResizeImage(size=64, resize_type='expand')
