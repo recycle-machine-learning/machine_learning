@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     for epoch in range(epochs):
         avg_cost = 0
-
+        prediction_train = []
         for i in range(0, total_batch, batch_size):
             max_idx = min(i + batch_size, total_batch)
             batch_x = x_train[i:max_idx].to(device)
@@ -50,9 +50,14 @@ if __name__ == '__main__':
             cost.backward()
             optimizer.step()
             avg_cost += cost / total_batch
+            prediction_train.append(hypothesis.to(device ='cpu'))
+
+        prediction_train = torch.cat(prediction_train, 0)
+        correct_prediction_train = torch.argmax(prediction_train, dim=1) == y_train
+        train_accuracy = correct_prediction_train.float().mean()
 
         print('[Epoch: {:>4}] cost = {:>.9}'.format(epoch + 1, avg_cost))
-
+        print('training Accuracy:', train_accuracy.item())
         prediction = model(x_test)
         correct_prediction = torch.argmax(prediction, dim=1) == y_test
         accuracy = correct_prediction.float().mean()
