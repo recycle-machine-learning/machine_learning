@@ -1,9 +1,9 @@
-import numpy as np
 import torch
 from torch.nn import Fold, Unfold
+from torch.nn.modules.module import Module
 
 
-class Convolution:
+class Convolution(Module):
     def __init__(
             self,
             in_channels: int,
@@ -11,6 +11,8 @@ class Convolution:
             kernel_size: int,
             stride: int = 1,
             padding: int = 0):
+        super().__init__(in_channels, out_channels, kernel_size, stride, padding)
+
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
@@ -65,6 +67,7 @@ class Convolution:
         col = col.view(self.x_im2col.shape).permute(0, 2, 1)
 
         batch_size, channel, height, width = self.x.shape
-        fold = Fold(output_size=(height, width), kernel_size=(filter_height, filter_width), padding=self.padding, stride=self.stride)
+        fold = Fold(output_size=(height, width), kernel_size=(filter_height, filter_width),
+                    padding=self.padding, stride=self.stride)
         dx = fold(col)
         return dx
