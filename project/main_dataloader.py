@@ -3,10 +3,10 @@ import time
 import torch
 import torch.nn as nn
 from project.cnn import CNN
-from torchvision.transforms import ToTensor, Lambda
+from torchvision.transforms import Lambda
 
-from custom_dataset import CustomDataset
-from custom_dataloader import CustomDataLoader
+from project.dataloader.custom_dataset import CustomDataset
+from project.dataloader.custom_dataloader import CustomDataLoader
 
 if __name__ == '__main__':
     device = torch.device("mps" if torch.backends.mps.is_available() else
