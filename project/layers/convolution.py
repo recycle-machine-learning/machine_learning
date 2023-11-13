@@ -18,8 +18,8 @@ class Convolution():
         self.padding = padding
 
         weight_shape = (out_channels, in_channels, kernel_size, kernel_size)
-        self.weight = torch.randn(weight_shape, dtype=torch.float32)
-        self.bias = torch.randn((out_channels, 1, 1), dtype=torch.float32)
+        self.weight = torch.randn(weight_shape, dtype=torch.float32, device="mps")
+        self.bias = torch.randn((out_channels, 1, 1), dtype=torch.float32, device="mps")
 
         self.x = None
         self.x_im2col = None
