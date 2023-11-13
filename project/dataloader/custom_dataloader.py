@@ -1,6 +1,7 @@
 import torch
 import torch.utils.data as data
-from resize_image import ResizeImage
+
+from project.datatransform.resize_image import ResizeImage
 
 
 class CustomDataLoader(data.DataLoader):
