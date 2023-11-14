@@ -6,8 +6,10 @@ import torch
 # dout = (batch_size, output_features)
 class Affine:
     def __init__(self, input_features, output_features, bias):
-        self.weight = torch.randn((output_features, input_features), dtype=torch.float32, device="mps")
-        self.b = torch.randn(output_features, dtype=torch.float32, device="mps")
+        self.weight = torch.clamp(torch.randn((output_features, input_features), dtype=torch.float32, device="mps"),
+                                  -1 / input_features**(1/2), 1 / input_features**(1/2))
+        self.b = torch.clamp(torch.randn(output_features, dtype=torch.float32, device="mps"),
+                             -1 / input_features**(1/2), 1 / input_features**(1/2))
         self.bias = bias
         self.x_reshape = None
         self.x = None
