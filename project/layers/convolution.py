@@ -1,15 +1,17 @@
 import torch
 from torch.nn import Fold, Unfold
+from torch.nn.init import kaiming_normal_
 
 
-class Convolution():
+class Convolution:
     def __init__(
             self,
             in_channels: int,
             out_channels: int,
             kernel_size: int,
             stride: int = 1,
-            padding: int = 0):
+            padding: int = 0,
+            device: str = "cpu"):
 
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -18,8 +20,10 @@ class Convolution():
         self.padding = padding
 
         weight_shape = (out_channels, in_channels, kernel_size, kernel_size)
-        self.weight = torch.randn(weight_shape, dtype=torch.float32, device="mps")
-        self.bias = torch.randn((out_channels, 1, 1), dtype=torch.float32, device="mps")
+        weight = torch.empty(weight_shape, device=device)
+        # He 초깃값 적용
+        self.weight = kaiming_normal_(weight, nonlinearity='relu')
+        self.bias = torch.zeros((out_channels, 1, 1), device=device)
 
         self.x = None
         self.x_im2col = None
@@ -30,9 +34,9 @@ class Convolution():
 
     def forward(self, x):
         """
-        합성곱 결과 반환
+        입력(x)을 저장하고 합성곱 결과 반환
         :param x: torch.Tensor(batch_size: 배치 크기, channel: 채널 크기, height: 데이터 높이, width: 데이터 너비)
-        :return:
+        :return: 순전파 결과
         """
         filter_number, channel, filter_height, filter_width = self.weight.shape
         batch_size, channel, height, width = x.shape
