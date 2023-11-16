@@ -13,10 +13,11 @@ class Affine(Module):
         super().__init__()
         self.weight = Parameter(torch.empty((output_features, input_features), **factory_kwargs))
         if bias:
-            self.bias = Parameter(torch.empty(output_features, **factory_kwargs))
-        # else:
-        #     self.register_parameter('bias', None)
+            self.b = Parameter(torch.empty(output_features, **factory_kwargs))
+        else:
+            self.register_parameter('b', None)
 
+        self.bias = bias
         self.x_reshape = None
         self.x = None
         self.dw = None
