@@ -1,15 +1,22 @@
 import torch
+from torch.nn.modules import Module
+from torch.nn.parameter import Parameter
+
 
 # x Shape = (batch_size, channel, width, height)
 # x_reshape = (batch_size, input_features)
 # w Shape = (channel * width * height, output_features)
 # dout = (batch_size, output_features)
-class Affine:
-    def __init__(self, input_features, output_features, bias):
-        self.weight = torch.clamp(torch.randn((output_features, input_features), dtype=torch.float32, device="mps"),
-                                  -1 / input_features**(1/2), 1 / input_features**(1/2))
-        self.b = torch.clamp(torch.randn(output_features, dtype=torch.float32, device="mps"),
-                             -1 / input_features**(1/2), 1 / input_features**(1/2))
+class Affine(Module):
+    def __init__(self, input_features, output_features, bias, device='cpu', dtype=None):
+        factory_kwargs = {'device': device, 'dtype': dtype}
+        super().__init__()
+        self.weight = Parameter(torch.empty((output_features, input_features), **factory_kwargs))
+        if bias:
+            self.b = Parameter(torch.empty(output_features, **factory_kwargs))
+        else:
+            self.register_parameter('b', None)
+
         self.bias = bias
         self.x_reshape = None
         self.x = None
@@ -26,8 +33,8 @@ class Affine:
     def forward(self, x):
         batch_size = x.size(dim = 0)
         self.x = x
-        self.x_reshape = x.view(batch_size, -1)
-        out = (self.x_reshape.matmul(self.weight.T))
+        # self.x_reshape = x.view(batch_size, -1)
+        out = (self.x.matmul(self.weight.T))
         if self.bias:
             out += self.b
 

@@ -2,6 +2,7 @@ import time
 import torch
 import torch.nn as nn
 from project.dataloader.image_full_load import load_data
+import matplotlib.pyplot as plt
 
 from project.cnn import CNN
 
@@ -15,8 +16,7 @@ if __name__ == '__main__':
     model = CNN().to(device)
 
     criterion = nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.00001)
-
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)
     load_start = time.time()
 
     x_train, y_train, x_test, y_test = load_data()
@@ -32,13 +32,15 @@ if __name__ == '__main__':
     total_batch = len(x_train)
     print('총 배치의 수 : {}'.format(total_batch))
 
-    epochs = 100
+    epochs = 10
     batch_size = 50
+
+    accuracy_list = []
 
 
     for epoch in range(epochs):
         avg_cost = 0
-        prediction_train = []
+
         for i in range(0, total_batch, batch_size):
             max_idx = min(i + batch_size, total_batch)
             batch_x = x_train[i:max_idx].to(device)
@@ -61,10 +63,18 @@ if __name__ == '__main__':
         prediction = model(x_test)
         correct_prediction = torch.argmax(prediction, dim=1) == y_test
         accuracy = correct_prediction.float().mean()
+        accuracy_list.append(accuracy.item())
         print('Accuracy:', accuracy.item())
 
     end = time.time()
     print('총 학습 시간 : {}'.format(end - start))
 
+
+    # label x = range(0, 20)
+    # accuracy_list y = accuracy_list
+    plt.plot(accuracy_list)
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.show()
 
 
