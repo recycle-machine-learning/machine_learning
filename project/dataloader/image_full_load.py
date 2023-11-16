@@ -19,12 +19,10 @@ def load_data(size=64, normalize=True):
 
     with mp.Pool(processes=mp.cpu_count()) as pool:
         print(file_list)
-        pool_result = pool.starmap(load_data_single_class,
-                                   zip(file_list,
-                                       [idx for idx in range(len(file_list))],
-                                       size,
-                                       normalize)
-                                   )
+        pool_result = pool.starmap(load_data_single_class,zip(file_list,
+                                                              [idx for idx in range(len(file_list))],
+                                                              [size] * len(file_list),
+                                                              [normalize] * len(file_list)))
 
     x_train = [result[0] for result in pool_result]
     y_train = [result[1] for result in pool_result]
@@ -47,7 +45,7 @@ def load_data(size=64, normalize=True):
     return x_train, y_train, x_test, y_test
 
 
-def load_data_single_class(path, class_idx, size, normalize):
+def load_data_single_class(path, class_idx, size=64, normalize=True):
     path = 'dataset/garbage_classification/' + path
 
     image_ary = resize_image(path, size, normalize)
