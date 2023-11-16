@@ -19,7 +19,7 @@ class ResizeImage(object):
             img = self.crush_resize(img)
 
         if self.normalize:
-            img = img.astype(np.float64) / 255
+            img = img.astype(np.float32) / 255
 
         if self.transform:
             return self.transform(img)
