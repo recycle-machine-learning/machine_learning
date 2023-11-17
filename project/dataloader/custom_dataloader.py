@@ -23,7 +23,6 @@ def _collate_fn(batch):
         resized_images.append(transformed_img)
 
     img_tensors = torch.cat([t.unsqueeze(0) for t in resized_images], 0)
-    img_tensors.permute(0, 3, 1, 2)
     label_tensors = torch.cat([t.unsqueeze(0) for t in labels], 0)
 
     return img_tensors, label_tensors
