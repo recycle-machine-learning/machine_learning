@@ -12,17 +12,13 @@ def load_data(size=64, normalize=True):
     # .DS_Store 디렉토리 제외
     file_list = [file for file in listdir if not file.startswith('.DS_Store')]
 
-    x_train = []
-    y_train = []
-    x_test = []
-    y_test = []
-
     with mp.Pool(processes=mp.cpu_count()) as pool:
         print(file_list)
-        pool_result = pool.starmap(load_data_single_class,zip(file_list,
-                                                              [idx for idx in range(len(file_list))],
-                                                              [size] * len(file_list),
-                                                              [normalize] * len(file_list)))
+        pool_result = pool.starmap(load_data_single_class,
+                                   zip(file_list,
+                                       [idx for idx in range(len(file_list))],
+                                       [size] * len(file_list),
+                                       [normalize] * len(file_list)))
 
     x_train = [result[0] for result in pool_result]
     y_train = [result[1] for result in pool_result]
@@ -37,10 +33,10 @@ def load_data(size=64, normalize=True):
     train_random_index = np.random.permutation(len(x_train))
     test_random_index = np.random.permutation(len(x_test))
 
-    x_train = np.take_along_axis(x_train, train_random_index[:, np.newaxis, np.newaxis, np.newaxis], axis=0)
-    y_train = np.take_along_axis(y_train, train_random_index, axis=0)
-    x_test = np.take_along_axis(x_test, test_random_index[:, np.newaxis, np.newaxis, np.newaxis], axis=0)
-    y_test = np.take_along_axis(y_test, test_random_index, axis=0)
+    x_train = x_train[train_random_index]
+    y_train = y_train[train_random_index]
+    x_test = x_test[test_random_index]
+    y_test = y_test[test_random_index]
 
     return x_train, y_train, x_test, y_test
 
