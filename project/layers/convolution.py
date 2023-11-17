@@ -1,18 +1,17 @@
+import math
+
 import torch
 from torch.nn import Fold, Unfold
-from torch.nn.init import kaiming_normal_
+from torch.nn.modules import Module
+from torch.nn.parameter import Parameter
+from torch.nn import init
 
 
-class Convolution:
-    def __init__(
-            self,
-            in_channels: int,
-            out_channels: int,
-            kernel_size: int,
-            stride: int = 1,
-            padding: int = 0,
-            device: str = "cpu"):
-
+class Convolution(Module):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, stride: int = 1, padding: int = 0,
+                 device: str = "cpu", dtype=None):
+        kwargs = {"device": device, "dtype": dtype}
+        super().__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
@@ -20,10 +19,10 @@ class Convolution:
         self.padding = padding
 
         weight_shape = (out_channels, in_channels, kernel_size, kernel_size)
-        weight = torch.empty(weight_shape, device=device)
-        # He 초깃값 적용
-        self.weight = kaiming_normal_(weight, nonlinearity='relu')
-        self.bias = torch.zeros((out_channels, 1, 1), device=device)
+        self.weight = Parameter(torch.empty(weight_shape, **kwargs))
+        self.bias = Parameter(torch.empty((out_channels, 1, 1), **kwargs))
+
+        self.reset_parameters()
 
         self.x = None
         self.x_im2col = None
@@ -31,6 +30,14 @@ class Convolution:
 
         self.d_weight = None
         self.d_bias = None
+
+    def reset_parameters(self) -> None:
+        init.kaiming_uniform_(self.weight, a=math.sqrt(5))
+        if self.bias is not None:
+            fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
+            if fan_in != 0:
+                bound = 1 / math.sqrt(fan_in)
+                init.uniform_(self.bias, -bound, bound)
 
     def forward(self, x):
         """
