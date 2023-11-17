@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from project.cnn import CNN
 from torchvision.transforms import Lambda
+import matplotlib.pyplot as plt
 
 from project.dataloader.custom_dataset import CustomDataset
 from project.dataloader.custom_dataloader import CustomDataLoader
@@ -39,6 +40,10 @@ if __name__ == "__main__":
     test_dataloader = CustomDataLoader(test_data, batch_size=30, shuffle=False)
 
     epochs = 10
+
+    test_accuracy_list = []
+    train_accuracy_list = []
+
     for epoch in range(epochs):
 
         avg_cost = 0
@@ -63,8 +68,10 @@ if __name__ == "__main__":
             if i % train_batch_size == 0:
                 print(i)
 
+        accuracy = 100 * train_correct / train_total
+        train_accuracy_list.append(accuracy)
         print("[Epoch: {:>4}] cost = {:>.9}".format(epoch + 1, avg_cost / train_total))
-        print("Train Accuracy: {0:.3f} %".format(100 * train_correct / train_total))
+        print("Train Accuracy: {0:.3f} %".format(accuracy))
 
         test_correct = 0
         test_total = 0
@@ -79,7 +86,16 @@ if __name__ == "__main__":
                 test_total += test_y.size(0)
                 test_correct += (predicted == torch.argmax(test_y, dim=1)).sum().item()
 
+        test_accuracy = 100 * test_correct / test_total
+        test_accuracy_list.append(test_accuracy)
         print("Test Accuracy: {0:.3f} %".format(100 * test_correct / test_total))
 
     end = time.time()
     print("총 학습 시간 : {}".format(end - start))
+
+    plt.plot(test_accuracy_list, '-r', label="Test Accuracy")
+    plt.plot(train_accuracy_list, '-b', label="Training Accuracy")
+    plt.legend()
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.show()
