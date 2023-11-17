@@ -1,6 +1,9 @@
+import math
+
 import torch
 from torch.nn.modules import Module
 from torch.nn.parameter import Parameter
+from torch.nn import init
 
 
 # x Shape = (batch_size, channel, width, height)
@@ -18,6 +21,14 @@ class Affine(Module):
             self.register_parameter('b', None)
 
         self.bias = bias
+
+        # 가중치 초기화
+        init.kaiming_normal_(self.weight, a=math.sqrt(5), nonlinearity='relu')
+        if self.bias:
+            fan_in, _ = init._calculate_fan_in_and_fan_out(self.weight)
+            bound = 1 / math.sqrt(fan_in) if fan_in > 0 else 0
+            init.uniform_(self.b, -bound, bound)
+
         self.x_reshape = None
         self.x = None
         self.dw = None
@@ -31,9 +42,7 @@ class Affine(Module):
     # out.shape = (batch_size, output_features) 
     """
     def forward(self, x):
-        batch_size = x.size(dim = 0)
         self.x = x
-        # self.x_reshape = x.view(batch_size, -1)
         out = (self.x.matmul(self.weight.T))
         if self.bias:
             out += self.b
@@ -41,13 +50,8 @@ class Affine(Module):
         return out
 
     def backward(self, dout):
-        dx =  dout.matmul(self.weight)
+        dx = dout.matmul(self.weight)
         self.dw = dout.T.matmul(self.x_reshape)
-        self.db = torch.sum(dout, dim = 0)
+        self.db = torch.sum(dout, dim=0)
         dx = dx.view(self.x.shape)
         return dx
-
-
-
-
-
