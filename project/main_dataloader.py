@@ -35,7 +35,7 @@ if __name__ == "__main__":
                               target_transform=Lambda(lambda y: torch.zeros(12, dtype=torch.float)
                                                       .scatter_(0, torch.tensor(y), value=1)))
 
-    train_batch_size= 50
+    train_batch_size= 100
     train_dataloader = CustomDataLoader(train_data, batch_size=train_batch_size, shuffle=True)
     test_dataloader = CustomDataLoader(test_data, batch_size=30, shuffle=False)
 
@@ -46,6 +46,7 @@ if __name__ == "__main__":
 
     for epoch in range(epochs):
 
+        model.train()
         avg_cost = 0
         train_correct = 0
         train_total = 0
@@ -73,6 +74,7 @@ if __name__ == "__main__":
         print("[Epoch: {:>4}] cost = {:>.9}".format(epoch + 1, avg_cost / train_total))
         print("Train Accuracy: {0:.3f} %".format(accuracy))
 
+        model.eval()
         test_correct = 0
         test_total = 0
         with (torch.no_grad()):
