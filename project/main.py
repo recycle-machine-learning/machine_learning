@@ -1,4 +1,5 @@
 import time
+
 import torch
 import torch.nn as nn
 from project.dataloader.image_full_load import load_data
@@ -6,10 +7,10 @@ import matplotlib.pyplot as plt
 
 from project.cnn import CNN
 
+
 if __name__ == '__main__':
     device = torch.device("mps") if torch.backends.mps.is_available() else "cpu"
     # device = "cpu"
-
 
     start = time.time()
 
@@ -24,7 +25,6 @@ if __name__ == '__main__':
     y_train = torch.from_numpy(y_train).long()
     x_test = torch.from_numpy(x_test).float().to(device)
     y_test = torch.from_numpy(y_test).long().to(device)
-
 
     load_end = time.time()
     print('데이터 로드 시간 : {}'.format(load_end - load_start))
@@ -61,15 +61,16 @@ if __name__ == '__main__':
 
         print('[Epoch: {:>4}] cost = {:>.9}'.format(epoch + 1, avg_cost))
         print('training Accuracy:', train_accuracy.item())
-        prediction = model(x_test)
-        correct_prediction = torch.argmax(prediction, dim=1) == y_test
-        accuracy = correct_prediction.float().mean()
-        accuracy_list.append(accuracy.item())
-        print('Accuracy:', accuracy.item())
+
+        with (torch.no_grad()):
+            prediction = model(x_test)
+            correct_prediction = torch.argmax(prediction, dim=1) == y_test
+            accuracy = correct_prediction.float().mean()
+            accuracy_list.append(accuracy.item())
+            print('Accuracy:', accuracy.item())
 
     end = time.time()
     print('총 학습 시간 : {}'.format(end - start))
-
 
     # label x = range(0, 20)
     # accuracy_list y = accuracy_list
