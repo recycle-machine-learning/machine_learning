@@ -16,7 +16,7 @@ if __name__ == '__main__':
     model = CNN().to(device)
 
     criterion = nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
     load_start = time.time()
 
     x_train, y_train, x_test, y_test = load_data()
@@ -36,11 +36,11 @@ if __name__ == '__main__':
     batch_size = 50
 
     accuracy_list = []
-
+    train_accuracy_list = []
 
     for epoch in range(epochs):
         avg_cost = 0
-
+        prediction_train = []   # batch
         for i in range(0, total_batch, batch_size):
             max_idx = min(i + batch_size, total_batch)
             batch_x = x_train[i:max_idx].to(device)
@@ -52,11 +52,12 @@ if __name__ == '__main__':
             cost.backward()
             optimizer.step()
             avg_cost += cost / total_batch
-            prediction_train.append(hypothesis.to(device ='cpu'))
+            prediction_train.append(hypothesis.to("cpu"))
 
         prediction_train = torch.cat(prediction_train, 0)
         correct_prediction_train = torch.argmax(prediction_train, dim=1) == y_train
         train_accuracy = correct_prediction_train.float().mean()
+        train_accuracy_list.append(train_accuracy.item())
 
         print('[Epoch: {:>4}] cost = {:>.9}'.format(epoch + 1, avg_cost))
         print('training Accuracy:', train_accuracy.item())
@@ -72,7 +73,9 @@ if __name__ == '__main__':
 
     # label x = range(0, 20)
     # accuracy_list y = accuracy_list
-    plt.plot(accuracy_list)
+    plt.plot(accuracy_list, '-r', label = "Test Accuracy")
+    plt.plot(train_accuracy_list, '-b', label= "Training Accuracy")
+    plt.legend()
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
     plt.show()
