@@ -1,8 +1,9 @@
 import time
 
+import numpy as np
 import torch
 import torch.nn as nn
-from torchvision.transforms import Lambda, ToTensor
+from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 
 from project.cnn import CNN
@@ -11,6 +12,9 @@ from project.dataloader.custom_dataloader import CustomDataLoader
 from project.dataloader.make_csv import save_csv
 from project.datatransform.resize_image import ResizeImage
 
+
+def one_hot_encode(label: np.ndarray) -> torch.Tensor:
+    return torch.zeros(12, dtype=torch.float).scatter_(0, torch.tensor(label), value=1)
 
 if __name__ == "__main__":
     device = torch.device("mps" if torch.backends.mps.is_available() else
@@ -32,20 +36,20 @@ if __name__ == "__main__":
     train_data = CustomDataset(annotations_file="train_data.csv",
                                img_dir="dataset/garbage_classification",
                                transform=resize,
-                               target_transform=Lambda(lambda y: torch.zeros(12, dtype=torch.float)
-                                                       .scatter_(0, torch.tensor(y), value=1)))
+                               target_transform=one_hot_encode)
 
     test_data = CustomDataset(annotations_file="test_data.csv",
                               img_dir="dataset/garbage_classification",
                               transform=resize,
-                              target_transform=Lambda(lambda y: torch.zeros(12, dtype=torch.float)
-                                                      .scatter_(0, torch.tensor(y), value=1)))
+                              target_transform=one_hot_encode)
 
     train_batch_size = 32
     test_batch_size = 32
 
-    train_dataloader = CustomDataLoader(train_data, batch_size=train_batch_size, shuffle=True)
-    test_dataloader = CustomDataLoader(test_data, batch_size=test_batch_size, shuffle=False)
+    train_dataloader = CustomDataLoader(train_data, batch_size=train_batch_size, shuffle=True,
+                                        num_workers=4, prefetch_factor=32, pin_memory=True)
+    test_dataloader = CustomDataLoader(test_data, batch_size=test_batch_size, shuffle=False,
+                                       num_workers=4, prefetch_factor=32, pin_memory=True)
 
     epochs = 20
 
