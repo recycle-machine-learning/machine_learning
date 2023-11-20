@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 import torch
-import torch.nn as nn
+from torch.nn import CrossEntropyLoss
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 
@@ -11,6 +11,7 @@ from project.dataloader.custom_dataset import CustomDataset
 from project.dataloader.custom_dataloader import CustomDataLoader
 from project.dataloader.make_csv import save_csv
 from project.datatransform.resize_image import ResizeImage
+from project.layers.softmax_crossentropy_loss import SoftmaxCrossEntropyLoss
 
 
 def one_hot_encode(label: np.ndarray) -> torch.Tensor:
@@ -25,13 +26,14 @@ if __name__ == "__main__":
 
     model = CNN().to(device)
 
-    criterion = nn.CrossEntropyLoss().to(device)
+    # criterion = CrossEntropyLoss().to(device)
+    criterion = SoftmaxCrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)
 
     load_start = time.time()
     save_csv()
 
-    resize = ResizeImage(size=64, transform=ToTensor(), resize_type='expand')
+    resize = ResizeImage(size=32, transform=ToTensor(), resize_type='expand')
 
     train_data = CustomDataset(annotations_file="train_data.csv",
                                img_dir="dataset/garbage_classification",
@@ -49,15 +51,15 @@ if __name__ == "__main__":
     train_dataloader = CustomDataLoader(train_data, batch_size=train_batch_size, shuffle=True,
                                         num_workers=4, prefetch_factor=32, pin_memory=True)
     test_dataloader = CustomDataLoader(test_data, batch_size=test_batch_size, shuffle=False,
-                                       num_workers=4, prefetch_factor=32, pin_memory=True)
+                                       num_workers=1, prefetch_factor=32, pin_memory=True)
 
-    epochs = 20
+    epochs = 10
 
     train_accuracy_list = []
     test_accuracy_list = []
 
     for epoch in range(epochs):
-        print("[Epoch: {:>4}] {:0.5g} %".format(1, 0.), end="")
+        print("[Epoch: {:>4}] {:0.5g} %".format(epoch + 1, 0.), end="")
 
         avg_cost = 0
         train_correct = 0
