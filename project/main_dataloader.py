@@ -6,16 +6,15 @@ from torch.nn import CrossEntropyLoss
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 
-from project.cnn import CNN
-from project.dataloader.custom_dataset import CustomDataset
-from project.dataloader.custom_dataloader import CustomDataLoader
-from project.dataloader.make_csv import save_csv
-from project.datatransform.resize_image import ResizeImage
-from project.layers.softmax_crossentropy_loss import SoftmaxCrossEntropyLoss
+from cnn import CNN
+from dataloader import CustomDataset, CustomDataLoader, save_csv
+from datatransform.resize_image import ResizeImage
+from layers import SoftmaxCrossEntropyLoss
 
 
 def one_hot_encode(label: np.ndarray) -> torch.Tensor:
     return torch.zeros(12, dtype=torch.float).scatter_(0, torch.tensor(label), value=1)
+
 
 if __name__ == "__main__":
     device = torch.device("mps" if torch.backends.mps.is_available() else

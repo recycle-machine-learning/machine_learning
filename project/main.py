@@ -2,10 +2,10 @@ import time
 
 import torch
 import torch.nn as nn
-from project.dataloader.image_full_load import load_data
 import matplotlib.pyplot as plt
 
-from project.cnn import CNN
+from cnn import CNN
+from dataloader import load_data
 
 
 if __name__ == '__main__':
