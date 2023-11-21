@@ -28,8 +28,8 @@ class Convolution(Module):
         self.x_im2col = None
         self.w_im2col = None
 
-        self.d_weight = None
-        self.d_bias = None
+        self.weight.grad = None
+        self.bias.grad = None
 
     def reset_parameters(self) -> None:
         init.kaiming_uniform_(self.weight, a=math.sqrt(5))
@@ -66,11 +66,11 @@ class Convolution(Module):
         filter_number, channel, filter_height, filter_width = self.weight.shape
         dout = dout.permute(0, 2, 3, 1).reshape(-1, filter_number)
 
-        self.d_bias = torch.sum(dout, dim=0)
+        self.bias.grad = torch.reshape(torch.sum(dout, dim=0), (torch.sum(dout, dim=0).size(0),1,1))
 
         reshape_col = self.x_im2col.reshape(-1, channel * filter_height * filter_width)
         mul = torch.matmul(reshape_col.T, dout)
-        self.d_weight = mul.permute(1, 0).view(filter_number, channel, filter_height, filter_width)
+        self.weight.grad = mul.permute(1, 0).view(filter_number, channel, filter_height, filter_width)
 
         col = torch.matmul(dout, self.w_im2col.T)
         col = col.view(self.x_im2col.shape).permute(0, 2, 1)
