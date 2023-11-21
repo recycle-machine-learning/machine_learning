@@ -10,7 +10,7 @@ from cnn import CNN
 from dataloader import CustomDataset, CustomDataLoader, save_csv
 from datatransform.resize_image import ResizeImage
 from layers import SoftmaxCrossEntropyLoss
-
+from backward import Backward
 
 def one_hot_encode(label: np.ndarray) -> torch.Tensor:
     return torch.zeros(12, dtype=torch.float).scatter_(0, torch.tensor(label), value=1)
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     # criterion = CrossEntropyLoss().to(device)
     criterion = SoftmaxCrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)
+    optimizer = torch.optim.Adam(model.parameters(), lr = 0.00005)
 
     load_start = time.time()
     save_csv()
@@ -72,7 +72,11 @@ if __name__ == "__main__":
 
             hypothesis = model(batch_x)
             cost = criterion(hypothesis, batch_y)
-            cost.backward()
+            # cost.backward()
+
+            backward = Backward(model)
+            backward.backward(criterion.backward())
+
             optimizer.step()
 
             avg_cost += cost.item()

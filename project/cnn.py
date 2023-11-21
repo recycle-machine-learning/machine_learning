@@ -33,26 +33,27 @@ class CNN(nn.Module):
         self.drop2 = nn.Dropout(0.2)
         self.drop3 = nn.Dropout(0.2)
 
-        self.relu = Relu()
+        self.relu1 = Relu()
+        self.relu2 = Relu()
 
     def forward(self, x):
         # out = self.conv1(x)
         out = self.conv1_test.forward(x)
-        out = self.bn1(out)
-        out = self.relu.forward(out)
+        # out = self.bn1(out)
+        out = self.relu1.forward(out)
         # out = self.drop1(out)
         # out = self.pool1(out)
         out = self.pool1_test.forward(out)
 
         # out = self.conv2(out)
         out = self.conv2_test.forward(out)
-        out = self.bn2(out)
-        out = self.relu.forward(out)
+        # out = self.bn2(out)
+        out = self.relu2.forward(out)
         # out = self.drop2(out)
         # out = self.pool2(out)
         out = self.pool2_test.forward(out)
 
-        out = out.reshape(out.size(0), -1)
+        # out = out.reshape(out.size(0), -1)
         # out = self.fc1(out)
         out = self.fc1_test.forward(out)
         # out = self.drop3(out)
