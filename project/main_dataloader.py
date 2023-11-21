@@ -18,8 +18,7 @@ if __name__ == "__main__":
     train_batch_size = 32
     test_batch_size = 32
 
-    device = torch.device("mps" if torch.backends.mps.is_available() else
-                          "cuda" if torch.cuda.is_available() else "cpu")
+    device = "cpu"
     print(device)
 
     start = time.time()
