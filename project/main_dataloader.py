@@ -10,10 +10,11 @@ from dataloader import CustomDataset, CustomDataLoader, save_csv
 from datatransform import ResizeImage, one_hot_encode
 from layers import SoftmaxCrossEntropyLoss
 from optimizer import *
+from backward import Backward
 
 
 if __name__ == "__main__":
-    epochs = 3
+    epochs = 10
     learning_rate = 0.00005
     train_batch_size = 32
     test_batch_size = 32
@@ -69,7 +70,11 @@ if __name__ == "__main__":
 
             hypothesis = model(batch_x)
             cost = criterion(hypothesis, batch_y)
-            cost.backward()
+            # cost.backward()
+
+            backward = Backward(model)
+            backward.backward(criterion.backward())
+
             optimizer.step()
 
             avg_cost += cost.item()
