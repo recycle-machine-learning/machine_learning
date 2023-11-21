@@ -9,10 +9,7 @@ from cnn import CNN
 from dataloader import CustomDataset, CustomDataLoader, save_csv
 from datatransform import ResizeImage, one_hot_encode
 from layers import SoftmaxCrossEntropyLoss
-
-
-def one_hot_encode(label: np.ndarray) -> torch.Tensor:
-    return torch.zeros(12, dtype=torch.float).scatter_(0, torch.tensor(label), value=1)
+from optimizer import *
 
 
 if __name__ == "__main__":
@@ -31,7 +28,9 @@ if __name__ == "__main__":
 
     # criterion = CrossEntropyLoss().to(device)
     criterion = SoftmaxCrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+    # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = Adam(model.parameters(), lr=learning_rate)
 
     load_start = time.time()
     save_csv()
