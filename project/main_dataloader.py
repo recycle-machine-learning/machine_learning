@@ -1,6 +1,5 @@
 import time
 
-import numpy as np
 import torch
 from torch.nn import CrossEntropyLoss
 from torchvision.transforms import ToTensor
@@ -8,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from cnn import CNN
 from dataloader import CustomDataset, CustomDataLoader, save_csv
-from datatransform.resize_image import ResizeImage
+from datatransform import ResizeImage, one_hot_encode
 from layers import SoftmaxCrossEntropyLoss
 
 
@@ -17,6 +16,11 @@ def one_hot_encode(label: np.ndarray) -> torch.Tensor:
 
 
 if __name__ == "__main__":
+    epochs = 3
+    learning_rate = 0.00005
+    train_batch_size = 32
+    test_batch_size = 32
+
     device = torch.device("mps" if torch.backends.mps.is_available() else
                           "cuda" if torch.cuda.is_available() else "cpu")
     print(device)
@@ -27,7 +31,7 @@ if __name__ == "__main__":
 
     # criterion = CrossEntropyLoss().to(device)
     criterion = SoftmaxCrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     load_start = time.time()
     save_csv()
@@ -44,15 +48,10 @@ if __name__ == "__main__":
                               transform=resize,
                               target_transform=one_hot_encode)
 
-    train_batch_size = 32
-    test_batch_size = 32
-
     train_dataloader = CustomDataLoader(train_data, batch_size=train_batch_size, shuffle=True,
                                         num_workers=4, prefetch_factor=32, pin_memory=True)
     test_dataloader = CustomDataLoader(test_data, batch_size=test_batch_size, shuffle=False,
                                        num_workers=1, prefetch_factor=32, pin_memory=True)
-
-    epochs = 10
 
     train_accuracy_list = []
     test_accuracy_list = []
