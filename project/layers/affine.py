@@ -31,8 +31,8 @@ class Affine(Module):
 
         self.x_reshape = None
         self.x = None
-        self.dw = None
-        self.db = None
+        self.weight.grad = None
+        self.b.grad = None
 
     """
     # input_features = channel * width * height
@@ -42,8 +42,11 @@ class Affine(Module):
     # out.shape = (batch_size, output_features) 
     """
     def forward(self, x):
+        # out = out.reshape(out.size(0), -1)
+
         self.x = x
-        out = (self.x.matmul(self.weight.T))
+        self.x_reshape = x.reshape(x.size(0), -1)
+        out = (self.x_reshape.matmul(self.weight.T))
         if self.bias:
             out += self.b
 
@@ -51,7 +54,7 @@ class Affine(Module):
 
     def backward(self, dout):
         dx = dout.matmul(self.weight)
-        self.dw = dout.T.matmul(self.x_reshape)
-        self.db = torch.sum(dout, dim=0)
+        self.weight.grad = dout.T.matmul(self.x_reshape)
+        self.b.grad = torch.sum(dout, dim=0)
         dx = dx.view(self.x.shape)
         return dx
