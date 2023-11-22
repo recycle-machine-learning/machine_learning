@@ -1,7 +1,6 @@
 import torch.nn as nn
 
 from layers import *
-from project.layers.batch_norm import BatchNormalization
 
 
 class CNN(nn.Module):
