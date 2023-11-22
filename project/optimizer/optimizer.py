@@ -2,12 +2,11 @@ class Optimizer:
     def __init__(self, params, lr):
         self.lr = lr
 
-        self.params = []
+        self.params = None
         self.init_params(params)
 
     def init_params(self, params):
-        for param in params:
-            self.params.append(param)
+        self.params = [param for param in params]
 
     def zero_grad(self):
         for param in self.params:

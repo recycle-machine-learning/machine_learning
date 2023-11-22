@@ -1,3 +1,5 @@
+import torch
+
 from .optimizer import Optimizer
 
 
@@ -7,4 +9,5 @@ class SGD(Optimizer):
 
     def step(self):
         for param in self.params:
-            param.data = param.data - param.grad * self.lr
+            with torch.autograd.no_grad():
+                param.data -= param.grad * self.lr
