@@ -11,7 +11,7 @@ from datatransform import ResizeImage, one_hot_encode
 from layers import SoftmaxCrossEntropyLoss
 from optimizer import *
 from backward import Backward
-
+from model_parameter import *
 
 if __name__ == "__main__":
     epochs = 10
@@ -109,6 +109,18 @@ if __name__ == "__main__":
         test_accuracy = 100 * test_correct / test_total
         test_accuracy_list.append(test_accuracy)
         print("\rTest Accuracy: {0:.3f} %".format(100 * test_correct / test_total))
+
+    # param 확인
+    par = model_parameter()
+    for p in model.conv1_test.parameters():
+        par.save_parameter(p)
+    par.parameter_csv("conv1_w","conv1_b")
+    for p in model.conv2_test.parameters():
+        par.save_parameter(p)
+    par.parameter_csv("conv2_w", "conv2_b")
+    for p in model.fc1_test.parameters():
+        par.save_parameter(p)
+    par.parameter_csv("fc1_w", "fc1_b")
 
     end = time.time()
     print("총 학습 시간 : {}".format(end - start))
