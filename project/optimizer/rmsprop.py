@@ -11,11 +11,10 @@ class RMSprop(Optimizer):
 
     def init_params(self, params):
         super().init_params(params)
-        self.h = []
-        for param in self.params:
-            self.h.append(torch.zeros_like(param))
+        self.h = [torch.zeros_like(param) for param in self.params]
 
     def step(self):
-        for i, param in enumerate(self.params):
-            self.h[i] = self.h[i] * self.weight_decay + (1 - self.weight_decay) * param.grad * param.grad
-            param.data -= self.lr * param.grad / (torch.sqrt(self.h[i]) + 1e-15)
+        with torch.autograd.no_grad():
+            for i, param in enumerate(self.params):
+                self.h[i] = self.h[i] * self.weight_decay + (1 - self.weight_decay) * param.grad * param.grad
+                param.data -= self.lr * param.grad / (torch.sqrt(self.h[i]) + 1e-15)
