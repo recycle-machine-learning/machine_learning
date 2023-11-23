@@ -1,6 +1,3 @@
-import torch
-from collections import OrderedDict
-from layers import *
 class Backward:
 
     def __init__(self, model):
@@ -16,7 +13,6 @@ class Backward:
 
         self.fc1 = model.fc1
 
-
     def backward(self, x):
         dout = self.fc1.backward(x)
 
@@ -29,8 +25,3 @@ class Backward:
         dout = self.relu1.backward(dout)
         dout = self.bn1.backward(dout)
         dout = self.conv1.backward(dout)
-
-
-
-
-

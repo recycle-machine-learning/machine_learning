@@ -5,7 +5,12 @@ import pandas as pd
 import numpy as np
 
 
-def save_csv(img_dir="dataset/garbage_classification"):
+def save_csv(img_dir="dataset/garbage_classification", ratio=0.9) -> None:
+    """
+    클래스 별로 비율에 따라 train_data, test_data를 임의로 나누고 순서를 섞어 csv 파일로 저장
+    :param img_dir: 이미지 데이터셋 경로
+    :param ratio: train_data 비율, 나머지는 test_dada
+    """
     img_dir_list = natsort.natsorted(os.listdir(img_dir))
 
     train_name_list = np.empty(0)
@@ -19,8 +24,7 @@ def save_csv(img_dir="dataset/garbage_classification"):
         img_list = np.array(natsort.natsorted(os.listdir(joined_path)))
         length = len(img_list)
 
-        ratio = 0.9
-        idx_permute = np.random.permutation(length)
+        idx_permute = np.random.permutation(length)  # 랜덤 인덱스
         train_length = int(length * ratio)
 
         train_join_list = [os.path.join(path, img) for img in img_list[idx_permute[:train_length]]]
@@ -28,9 +32,10 @@ def save_csv(img_dir="dataset/garbage_classification"):
         train_label_list = np.append(train_label_list, [i] * train_length)
 
         test_join_list = [os.path.join(path, img) for img in img_list[idx_permute[train_length:]]]
-        test_name_list =  np.append(test_name_list, test_join_list)
+        test_name_list = np.append(test_name_list, test_join_list)
         test_label_list = np.append(test_label_list, [i] * (length - train_length))
 
+    # 클래스 별로 나누어진 리스트를 재배열
     train_idx_permute = np.random.permutation(len(train_name_list))
     test_idx_permute = np.random.permutation(len(test_name_list))
 

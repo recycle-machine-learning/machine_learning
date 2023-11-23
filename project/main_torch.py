@@ -1,6 +1,5 @@
 import time
 
-import numpy as np
 import torch
 from torch.nn import CrossEntropyLoss
 from torchvision.transforms import ToTensor
@@ -9,10 +8,6 @@ import matplotlib.pyplot as plt
 from cnn_torch import CNNTorch
 from dataloader import CustomDataset, CustomDataLoader, save_csv
 from util import ResizeImage, one_hot_encode
-from layers import SoftmaxCrossEntropyLoss
-from optimizer import *
-from backward import Backward
-from model_parameter import *
 
 if __name__ == "__main__":
     epochs = 10
@@ -29,7 +24,6 @@ if __name__ == "__main__":
     start = time.time()
 
     model = CNNTorch(size, out_channel1, out_channel2).to(device)
-
     criterion = CrossEntropyLoss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -87,7 +81,6 @@ if __name__ == "__main__":
         print("\r[Epoch: {:>4}] cost = {:>.9}".format(epoch + 1, avg_cost / train_total))
         print("Train Accuracy: {0:.3f} %".format(accuracy))
 
-
         test_correct = 0
         test_complete = 0
         test_total = test_data.__len__()
@@ -109,8 +102,6 @@ if __name__ == "__main__":
         test_accuracy_list.append(test_accuracy)
         print("\rTest Accuracy: {0:.3f} %".format(100 * test_correct / test_total))
 
-
-
     end = time.time()
     print("총 학습 시간 : {}".format(end - start))
 
@@ -119,7 +110,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
-    plt.text(1, min(min(test_accuracy_list), min(train_accuracy_list)) + 1,
+    plt.text(0, min(min(test_accuracy_list), min(train_accuracy_list)) + 1,
              "isTorch = True\n" +
              "size = {0}, out_channel = {1}, {2}, lr = {3:f}"
              .format(size, out_channel1, out_channel2, learning_rate))
