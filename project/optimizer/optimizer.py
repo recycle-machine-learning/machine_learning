@@ -1,3 +1,6 @@
+import torch
+
+
 class Optimizer:
     def __init__(self, params, lr):
         self.lr = lr
@@ -9,8 +12,9 @@ class Optimizer:
         self.params = [param for param in params]
 
     def zero_grad(self):
-        for param in self.params:
-            param.grad = None
+        with torch.no_grad():
+            for param in self.params:
+                param.grad = None
 
     def step(self):
         pass

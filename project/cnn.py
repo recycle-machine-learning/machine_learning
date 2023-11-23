@@ -16,8 +16,6 @@ class CNN(nn.Module):
         self.relu1 = Relu()
         self.pool1 = MaxPooling(kernel_size=2, stride=2, padding=0)
 
-
-
         # 두 번째 층
         # Image Shape = (?, 64, 64, 16)
         # CONV = (?, 64, 64, 32)

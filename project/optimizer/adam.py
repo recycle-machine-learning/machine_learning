@@ -12,11 +12,11 @@ class Adam(Optimizer):
 
     def init_params(self, params):
         super().init_params(params)
-        self.m = [torch.zeros_like(param) for param in self.params]
-        self.v = [torch.zeros_like(param) for param in self.params]
+        self.m = [torch.zeros_like(param, requires_grad=False) for param in self.params]
+        self.v = [torch.zeros_like(param, requires_grad=False) for param in self.params]
 
     def step(self):
-        with torch.autograd.no_grad():
+        with torch.no_grad():
             for i, param in enumerate(self.params):
                 self.m[i] = self.m[i] * self.beta1 + (1 - self.beta1) * param.grad
                 self.v[i] = self.v[i] * self.beta2 + (1 - self.beta2) * param.grad * param.grad
