@@ -3,7 +3,7 @@ import unittest
 
 from PIL import Image
 
-from project.datatransform.resize_image import ResizeImage
+from project.util.resize_image import ResizeImage
 
 
 class ResizeImageTestCase(unittest.TestCase):

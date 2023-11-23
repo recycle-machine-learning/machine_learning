@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from cnn import CNN
 from dataloader import CustomDataset, CustomDataLoader, save_csv
-from datatransform import ResizeImage, one_hot_encode
+from util import ResizeImage, one_hot_encode
 from layers import SoftmaxCrossEntropyLoss
 from optimizer import *
 from backward import Backward
@@ -31,10 +31,8 @@ with torch.no_grad():
 
         model = CNN(size, out_channel1, out_channel2).to(device)
 
-        # criterion = CrossEntropyLoss().to(device)
         criterion = SoftmaxCrossEntropyLoss()
 
-        # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
         optimizer = Adam(model.parameters(), lr=learning_rate)
 
         load_start = time.time()
@@ -75,7 +73,6 @@ with torch.no_grad():
 
                 hypothesis = model(batch_x)
                 cost = criterion(hypothesis, batch_y)
-                # cost.backward()
 
                 backward = Backward(model)
                 backward.backward(criterion.backward())
@@ -117,13 +114,13 @@ with torch.no_grad():
 
         # param 확인
         par = model_parameter()
-        for p in model.conv1_test.parameters():
+        for p in model.conv1.parameters():
             par.save_parameter(p)
         par.parameter_csv("conv1_w","conv1_b")
-        for p in model.conv2_test.parameters():
+        for p in model.conv2.parameters():
             par.save_parameter(p)
         par.parameter_csv("conv2_w", "conv2_b")
-        for p in model.fc1_test.parameters():
+        for p in model.fc1.parameters():
             par.save_parameter(p)
         par.parameter_csv("fc1_w", "fc1_b")
 
@@ -136,6 +133,7 @@ with torch.no_grad():
         plt.xlabel('Epoch')
         plt.ylabel('Accuracy')
         plt.text(1, min(min(test_accuracy_list), min(train_accuracy_list)) + 1,
+                 "isTorch = False\n" +
                  "size = {0}, out_channel = {1}, {2}, lr = {3:f}"
-                 .format(size, model.conv1_test.out_channels, model.conv2_test.out_channels, learning_rate))
+                 .format(size, out_channel1, out_channel2, learning_rate))
         plt.show()
