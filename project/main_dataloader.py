@@ -16,13 +16,13 @@ from model_parameter import *
 
 with torch.no_grad():
     if __name__ == "__main__":
-        epochs = 10
+        epochs = 2
         learning_rate = 0.00005
         train_batch_size = 32
         test_batch_size = 32
-        size = 64
-        out_channel1 = 32
-        out_channel2 = 64
+        size = 32
+        out_channel1 = 16
+        out_channel2 = 32
 
         device = "cpu"
         print(device)
@@ -112,17 +112,15 @@ with torch.no_grad():
             test_accuracy_list.append(test_accuracy)
             print("\rTest Accuracy: {0:.3f} %".format(100 * test_correct / test_total))
 
-        # param 확인
+        # parameter save
         par = model_parameter()
-        for p in model.conv1.parameters():
-            par.save_parameter(p)
-        par.parameter_csv("conv1_w","conv1_b")
-        for p in model.conv2.parameters():
-            par.save_parameter(p)
-        par.parameter_csv("conv2_w", "conv2_b")
-        for p in model.fc1.parameters():
-            par.save_parameter(p)
-        par.parameter_csv("fc1_w", "fc1_b")
+        for name,p in model.conv1.named_parameters():
+            par.save_parameter(p, "conv1" + name)
+        for name,p in model.conv2.named_parameters():
+            par.save_parameter(p,"conv2" + name)
+        for name,p in model.fc1.named_parameters():
+            par.save_parameter(p,"fc1" + name)
+        par.parameter_csv(epochs, learning_rate, train_batch_size, test_batch_size, size, out_channel1, out_channel2)
 
         end = time.time()
         print("총 학습 시간 : {}".format(end - start))
