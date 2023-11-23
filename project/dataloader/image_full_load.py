@@ -4,7 +4,7 @@ import multiprocessing as mp
 import numpy as np
 from PIL import Image
 
-from project.datatransform.resize_image import ResizeImage
+from project.util.resize_image import ResizeImage
 
 
 def load_data(size=64, normalize=True):
