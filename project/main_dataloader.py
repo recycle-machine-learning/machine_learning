@@ -1,11 +1,12 @@
 import time
 
+from torch.utils.data import WeightedRandomSampler, RandomSampler
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 
 from cnn import CNN
 from dataloader import CustomDataset, CustomDataLoader, save_csv
-from util import ResizeImage, one_hot_encode
+from util import ResizeImage, one_hot_encode, make_weights
 from layers import SoftmaxCrossEntropyLoss
 from optimizer import *
 from backward import Backward
@@ -13,13 +14,14 @@ from model_parameter import *
 
 with torch.no_grad():
     if __name__ == "__main__":
-        epochs = 2
+        epochs = 10
         learning_rate = 0.00005
         train_batch_size = 32
         test_batch_size = 32
         size = 32
-        out_channel1 = 16
-        out_channel2 = 32
+        out_channel1 = 32
+        out_channel2 = 64
+        isWeighted = True
 
         device = "cpu"
         print(device)
@@ -31,9 +33,9 @@ with torch.no_grad():
         optimizer = Adam(model.parameters(), lr=learning_rate)
 
         load_start = time.time()
-        save_csv()
+        class_length = save_csv()
 
-        resize = ResizeImage(size = size, transform=ToTensor(), resize_type='expand')
+        resize = ResizeImage(size=size, transform=ToTensor(), resize_type='expand')
 
         train_data = CustomDataset(annotations_file="train_data.csv",
                                    img_dir="dataset/garbage_classification",
@@ -45,10 +47,16 @@ with torch.no_grad():
                                   transform=resize,
                                   target_transform=one_hot_encode)
 
-        train_dataloader = CustomDataLoader(train_data, batch_size=train_batch_size, shuffle=True,
-                                            num_workers=4, prefetch_factor=32, pin_memory=True)
-        test_dataloader = CustomDataLoader(test_data, batch_size=test_batch_size, shuffle=False,
-                                           num_workers=1, prefetch_factor=32, pin_memory=True)
+        if isWeighted:
+            weights = make_weights(class_length)
+            sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
+        else:
+            sampler = RandomSampler(train_data)
+
+        train_dataloader = CustomDataLoader(train_data, batch_size=train_batch_size, sampler=sampler,
+                                            num_workers=4, prefetch_factor=32)
+        test_dataloader = CustomDataLoader(test_data, batch_size=test_batch_size, shuffle=True,
+                                           num_workers=1, prefetch_factor=32)
 
         train_accuracy_list = []
         test_accuracy_list = []
@@ -86,10 +94,13 @@ with torch.no_grad():
             print("\r[Epoch: {:>4}] cost = {:>.9}".format(epoch + 1, avg_cost / train_total))
             print("Train Accuracy: {0:.3f} %".format(accuracy))
 
-            test_correct = 0
+            test_num = torch.zeros(12)
+            test_correct = torch.zeros(12)
             test_complete = 0
             test_total = test_data.__len__()
-            with (torch.inference_mode()):
+
+            with torch.no_grad():
+                model.eval()
                 print("Test Progress: {:0.5g} %".format(0.), end="")
                 for data in test_dataloader:
                     test_x = data[0].to(device)
@@ -99,23 +110,34 @@ with torch.no_grad():
 
                     _, predicted = torch.max(outputs.data, 1)
                     test_complete += test_y.shape[0]
-                    test_correct += (predicted == torch.argmax(test_y, dim=1)).sum().item()
+
+                    answer = torch.argmax(test_y, dim=1)
+                    for i in range(test_y.shape[0]):
+                        test_num[answer[i]] += 1
+                        if predicted[i] == answer[i]:
+                            test_correct[answer[i]] += 1
 
                     print("\rTest Progress: {:0.5g} %".format(100 * test_complete / test_total), end="")
 
-            test_accuracy = 100 * test_correct / test_total
+            test_accuracy = 100 * torch.sum(test_correct) / test_total
             test_accuracy_list.append(test_accuracy)
-            print("\rTest Accuracy: {0:.3f} %".format(100 * test_correct / test_total))
+            print("\rTest Accuracy: {0:.3f} %".format(test_accuracy))
+
+            print(test_num)
+            test_class_accuracy = 100 * test_correct / test_num
+            for i, class_accuracy in enumerate(test_class_accuracy):
+                print("class {0:d}: {1:.3f} %".format(i, class_accuracy))
 
         # parameter save
         par = model_parameter()
-        for name,p in model.conv1.named_parameters():
+        for name, p in model.conv1.named_parameters():
             par.save_parameter(p, "conv1" + name)
-        for name,p in model.conv2.named_parameters():
-            par.save_parameter(p,"conv2" + name)
-        for name,p in model.fc1.named_parameters():
-            par.save_parameter(p,"fc1" + name)
-        par.parameter_csv(epochs, learning_rate, train_batch_size, test_batch_size, size, out_channel1, out_channel2)
+        for name, p in model.conv2.named_parameters():
+            par.save_parameter(p, "conv2" + name)
+        for name, p in model.fc1.named_parameters():
+            par.save_parameter(p, "fc1" + name)
+        par.parameter_csv(epochs, learning_rate, train_batch_size, test_batch_size, size, out_channel1,
+                          out_channel2)
 
         end = time.time()
         print("총 학습 시간 : {}".format(end - start))

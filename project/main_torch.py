@@ -2,21 +2,23 @@ import time
 
 import torch
 from torch.nn import CrossEntropyLoss
+from torch.utils.data import WeightedRandomSampler, RandomSampler
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 
 from cnn_torch import CNNTorch
 from dataloader import CustomDataset, CustomDataLoader, save_csv
-from util import ResizeImage, one_hot_encode
+from util import ResizeImage, one_hot_encode, make_weights
 
 if __name__ == "__main__":
     epochs = 10
     learning_rate = 0.00005
     train_batch_size = 32
     test_batch_size = 32
-    size = 64
+    size = 32
     out_channel1 = 32
     out_channel2 = 64
+    isWeighted = True
 
     device = "cpu"
     print(device)
@@ -28,7 +30,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     load_start = time.time()
-    save_csv()
+    class_length = save_csv()
 
     resize = ResizeImage(size = size, transform=ToTensor(), resize_type='expand')
 
@@ -42,7 +44,15 @@ if __name__ == "__main__":
                               transform=resize,
                               target_transform=one_hot_encode)
 
-    train_dataloader = CustomDataLoader(train_data, batch_size=train_batch_size, shuffle=True,
+    weights = make_weights(class_length)
+
+    if isWeighted:
+        weights = make_weights(class_length)
+        sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True)
+    else:
+        sampler = RandomSampler(train_data)
+
+    train_dataloader = CustomDataLoader(train_data, batch_size=train_batch_size, sampler=sampler,
                                         num_workers=4, prefetch_factor=32, pin_memory=True)
     test_dataloader = CustomDataLoader(test_data, batch_size=test_batch_size, shuffle=False,
                                        num_workers=1, prefetch_factor=32, pin_memory=True)
@@ -58,6 +68,7 @@ if __name__ == "__main__":
         train_complete = 0
         train_total = train_data.__len__()
         for i, data in enumerate(train_dataloader):
+            model.train()
             batch_x = data[0].to(device)
             batch_y = data[1].to(device)
 
@@ -81,10 +92,13 @@ if __name__ == "__main__":
         print("\r[Epoch: {:>4}] cost = {:>.9}".format(epoch + 1, avg_cost / train_total))
         print("Train Accuracy: {0:.3f} %".format(accuracy))
 
-        test_correct = 0
+        test_num = torch.zeros(12)
+        test_correct = torch.zeros(12)
         test_complete = 0
         test_total = test_data.__len__()
-        with (torch.inference_mode()):
+
+        with torch.no_grad():
+            model.eval()
             print("Test Progress: {:0.5g} %".format(0.), end="")
             for data in test_dataloader:
                 test_x = data[0].to(device)
@@ -94,13 +108,23 @@ if __name__ == "__main__":
 
                 _, predicted = torch.max(outputs.data, 1)
                 test_complete += test_y.shape[0]
-                test_correct += (predicted == torch.argmax(test_y, dim=1)).sum().item()
+
+                answer = torch.argmax(test_y, dim=1)
+                for i in range(test_y.shape[0]):
+                    test_num[answer[i]] += 1
+                    if predicted[i] == answer[i]:
+                        test_correct[answer[i]] += 1
 
                 print("\rTest Progress: {:0.5g} %".format(100 * test_complete / test_total), end="")
 
-        test_accuracy = 100 * test_correct / test_total
+        test_accuracy = 100 * torch.sum(test_correct) / test_total
         test_accuracy_list.append(test_accuracy)
-        print("\rTest Accuracy: {0:.3f} %".format(100 * test_correct / test_total))
+        print("\rTest Accuracy: {0:.3f} %".format(test_accuracy))
+
+        print(test_num)
+        test_class_accuracy = 100 * test_correct / test_num
+        for i, class_accuracy in enumerate(test_class_accuracy):
+            print("class {0:d}: {1:.3f} %".format(i, class_accuracy))
 
     end = time.time()
     print("총 학습 시간 : {}".format(end - start))
@@ -110,7 +134,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
-    plt.text(0, min(min(test_accuracy_list), min(train_accuracy_list)) + 1,
+    plt.text(1, min(min(test_accuracy_list), min(train_accuracy_list)) + 1,
              "isTorch = True\n" +
              "size = {0}, out_channel = {1}, {2}, lr = {3:f}"
              .format(size, out_channel1, out_channel2, learning_rate))
