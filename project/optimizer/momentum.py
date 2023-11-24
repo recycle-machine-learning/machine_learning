@@ -9,12 +9,14 @@ class Momentum(Optimizer):
         self.momentum = momentum
         super().__init__(params, lr)
 
-    def init_params(self, params):
+    def init_params(self, params) -> None:
         super().init_params(params)
+        # 각 Parameter와 같은 형상의 텐서를 0으로 초기화
         self.v = [torch.zeros_like(param) for param in self.params]
 
-    def step(self):
+    def step(self) -> None:
         with torch.autograd.no_grad():
             for i, param in enumerate(self.params):
+                # 가속도 개념 도입
                 self.v[i] = self.momentum * self.v[i] - self.lr * param.grad
                 param.data += self.v[i]

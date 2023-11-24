@@ -10,7 +10,7 @@ class ResizeImage(object):
         self.resize_type = resize_type
         self.normalize = normalize
 
-    def __call__(self, img):
+    def __call__(self, img: Image.Image):
         if self.resize_type == 'expand':
             img = self.pad_expand(img)
         elif self.resize_type == 'crop':

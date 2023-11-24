@@ -1,8 +1,5 @@
 import time
 
-import numpy as np
-import torch
-from torch.nn import CrossEntropyLoss
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 
@@ -30,9 +27,7 @@ with torch.no_grad():
         start = time.time()
 
         model = CNN(size, out_channel1, out_channel2).to(device)
-
         criterion = SoftmaxCrossEntropyLoss()
-
         optimizer = Adam(model.parameters(), lr=learning_rate)
 
         load_start = time.time()
@@ -132,7 +127,7 @@ with torch.no_grad():
         plt.legend()
         plt.xlabel('Epoch')
         plt.ylabel('Accuracy')
-        plt.text(1, min(min(test_accuracy_list), min(train_accuracy_list)) + 1,
+        plt.text(0, min(min(test_accuracy_list), min(train_accuracy_list)) + 1,
                  "isTorch = False\n" +
                  "size = {0}, out_channel = {1}, {2}, lr = {3:f}"
                  .format(size, out_channel1, out_channel2, learning_rate))
