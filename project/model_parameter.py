@@ -22,7 +22,7 @@ class model_parameter:
               "out_channel2": [out_channel2]}
         self.param.update(hp)
         df = pd.DataFrame.from_dict(self.param, orient= "index")
-        df.to_csv("parameter.csv")
+        df.to_csv("parameters.csv")
 
 
     def load_parameters(self,p_name, shape):
