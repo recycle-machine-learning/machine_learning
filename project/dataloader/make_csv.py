@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 
-def save_csv(img_dir="dataset/garbage_classification", ratio=0.9) -> np.ndarray:
+def save_csv(img_dir="dataset/garbage_classification", ratio=None) -> np.ndarray:
     """
     클래스 별로 비율에 따라 train_data, test_data를 임의로 나누고 csv 파일로 저장
     :param img_dir: 이미지 데이터셋 경로
@@ -28,7 +28,12 @@ def save_csv(img_dir="dataset/garbage_classification", ratio=0.9) -> np.ndarray:
         length = len(img_list)
 
         idx_permute = np.random.permutation(length)  # 랜덤 인덱스
-        train_length = int(length * ratio)
+
+        if ratio is None:
+            train_length = length - 100
+        else:
+            train_length = int(length * ratio)
+
         class_length_list = np.append(class_length_list, train_length)
 
         train_join_list = [os.path.join(path, img) for img in img_list[idx_permute[:train_length]]]
