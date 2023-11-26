@@ -3,7 +3,7 @@ import time
 from torch.utils.data import WeightedRandomSampler, RandomSampler
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
-
+import torch
 from cnn import CNN
 from dataloader import CustomDataset, CustomDataLoader, save_csv
 from util import ResizeImage, one_hot_encode, make_weights
@@ -14,13 +14,13 @@ from model_parameter import *
 
 with torch.no_grad():
     if __name__ == "__main__":
-        epochs = 10
+        epochs = 1
         learning_rate = 0.00005
         train_batch_size = 32
         test_batch_size = 32
         size = 32
-        out_channel1 = 32
-        out_channel2 = 64
+        out_channel1 = 16
+        out_channel2 = 32
         isWeighted = True
 
         device = "cpu"
