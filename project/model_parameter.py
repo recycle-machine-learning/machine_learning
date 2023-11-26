@@ -22,28 +22,39 @@ class model_parameter:
               "out_channel2": [out_channel2]}
         self.param.update(hp)
         df = pd.DataFrame.from_dict(self.param, orient= "index")
-        df.to_csv("parameter.csv")
+        df.to_csv("parameters.csv")
 
 
     def load_parameters(self,p_name, shape):
         df = pd.read_csv("parameters.csv")
         df = df.transpose()
+
         columns = df.loc['Unnamed: 0']
         df.rename(columns=columns, inplace = True)
         df = df.drop(['Unnamed: 0'],axis=0)
+
         parameter = df.loc[:, p_name]
         parameter = parameter.dropna(axis=0)
         parameter = parameter.to_frame()
         parameter = self.to_tensor(parameter,shape)
         return parameter
 
+    def load_h_parameters(self,p_name):
+        np.set_printoptions(precision=6, suppress=True)
+        df = pd.read_csv("parameters.csv")
+        df = df.transpose()
+
+        columns = df.loc['Unnamed: 0']
+        df.rename(columns=columns, inplace = True)
+        df = df.drop(['Unnamed: 0'],axis=0)
+
+        parameter = df.iloc[0][p_name]
+        return parameter
     def to_tensor(self, p, shape):
         p = p.values
         p = p.reshape(shape)
-        p = np.asarray(p, dtype= float)
+        p = np.asarray(p, dtype = float)
         p_tensor = torch.from_numpy(p)
         p_tensor = p_tensor.type(torch.FloatTensor)
         return p_tensor
-
-
 

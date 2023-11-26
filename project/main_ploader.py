@@ -4,6 +4,7 @@ from torch.utils.data import WeightedRandomSampler, RandomSampler
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
 import torch
+from model_parameter import *
 from cnn_pload import CNN_pload
 from dataloader import CustomDataset, CustomDataLoader, save_csv
 from util import ResizeImage, one_hot_encode, make_weights
@@ -13,13 +14,14 @@ from backward import Backward
 
 with torch.no_grad():
     if __name__ == "__main__":
+        p = model_parameter()
         epochs = 1
-        learning_rate = 0.00005
+        learning_rate = float(p.load_h_parameters("learning_rate"))
         train_batch_size = 32
         test_batch_size = 32
-        size = 32
-        out_channel1 = 16
-        out_channel2 = 32
+        size = int(p.load_h_parameters("size"))
+        out_channel1 = int(p.load_h_parameters("out_channel1"))
+        out_channel2 = int(p.load_h_parameters("out_channel2"))
         isWeighted = True
 
         device = "cpu"
