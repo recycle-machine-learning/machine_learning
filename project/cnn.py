@@ -4,7 +4,7 @@ from layers import *
 
 
 class CNN(nn.Module):
-    def __init__(self, size, out_channel1, out_channel2):
+    def __init__(self, size, out_channel1, out_channel2, label_size):
         super(CNN, self).__init__()
         # 첫 번째 층
         # Image Shape = (?, 128, 128, 3)
@@ -26,8 +26,7 @@ class CNN(nn.Module):
         self.pool2 = MaxPooling(kernel_size=2, stride=2, padding=0)
         self.relu2 = Relu()
 
-        self.fc1 = Affine((size // 4) * (size // 4) * out_channel2, 12, bias=True)
-
+        self.fc1 = Affine((size // 4) * (size // 4) * out_channel2, label_size, bias=True)
 
     def forward(self, x):
         out = self.conv1.forward(x)

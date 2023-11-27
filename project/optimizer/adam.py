@@ -26,10 +26,9 @@ class Adam(Optimizer):
         self.v = [torch.zeros_like(param, requires_grad=False) for param in self.params]
 
     def step(self, c=1e-15) -> None:
-        with torch.no_grad():
-            for i, param in enumerate(self.params):
-                # Momentum
-                self.m[i] = self.m[i] * self.beta1 + (1 - self.beta1) * param.grad
-                # Adagrad
-                self.v[i] = self.v[i] * self.beta2 + (1 - self.beta2) * param.grad * param.grad
-                param.data -= self.lr * self.m[i] / (torch.sqrt(self.v[i]) + c)
+        for i, param in enumerate(self.params):
+            # Momentum
+            self.m[i] = self.m[i] * self.beta1 + (1 - self.beta1) * param.grad
+            # Adagrad
+            self.v[i] = self.v[i] * self.beta2 + (1 - self.beta2) * param.grad * param.grad
+            param.data -= self.lr * self.m[i] / (torch.sqrt(self.v[i]) + c)

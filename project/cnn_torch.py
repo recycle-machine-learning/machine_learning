@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 class CNNTorch(nn.Module):
-    def __init__(self, size, out_channel1, out_channel2):
+    def __init__(self, size, out_channel1, out_channel2, label_size):
         super(CNNTorch, self).__init__()
 
         # 첫 번째 층
@@ -29,8 +29,7 @@ class CNNTorch(nn.Module):
         )
 
         self.layer3 = nn.Sequential(
-            nn.Linear((size // 4) * (size // 4) * out_channel2, 12, bias=True)
-
+            nn.Linear((size // 4) * (size // 4) * out_channel2, label_size, bias=True)
         )
 
     def forward(self, x):

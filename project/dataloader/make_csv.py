@@ -29,6 +29,7 @@ def save_csv(img_dir="dataset/garbage_classification", ratio=None) -> np.ndarray
 
         idx_permute = np.random.permutation(length)  # 랜덤 인덱스
 
+        # 비율이 정해지지 않았으면 test data 100개 선별
         if ratio is None:
             train_length = length - 100
         else:

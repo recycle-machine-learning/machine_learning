@@ -14,8 +14,7 @@ class Adagrad(Optimizer):
         self.h = [torch.zeros_like(param) for param in self.params]
 
     def step(self) -> None:
-        with torch.autograd.no_grad():
-            for i, param in enumerate(self.params):
-                # 이전까지 더 많이 변화했을수록 더 적게 변화
-                self.h[i] += param.grad * param.grad
-                param.data -= self.lr * param.grad / (torch.sqrt(self.h[i]) + 1e-15)
+        for i, param in enumerate(self.params):
+            # 이전까지 더 많이 변화했을수록 더 적게 변화
+            self.h[i] += param.grad * param.grad
+            param.data -= self.lr * param.grad / (torch.sqrt(self.h[i]) + 1e-15)
