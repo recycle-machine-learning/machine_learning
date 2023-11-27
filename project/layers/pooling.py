@@ -9,6 +9,11 @@ kernel, stride, padding 개념 참조 (https://hi-lu.tistory.com/entry/파이썬
 
 class MaxPooling:
     def __init__(self, kernel_size, stride, padding):
+        """
+        :param kernel_size: 최댓값을 구하는 영역의 크기
+        :param stride: 한 번에 이동하는 크기
+        :param padding: 입력 데이터의 주변을 특정 값으로 채우는 것
+        """
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
@@ -31,8 +36,6 @@ class MaxPooling:
                 ((width - kernel_size + 2*padding)/stride +1)
                 )
 
-
-        forward : padding -> max
         """
         x_unfold = self.unfold(x)
         x_unfold_permute = (
@@ -49,12 +52,13 @@ class MaxPooling:
 
     def backward(self, dout: Tensor):
         """
-        최댓값 위치에 dout 값, 나머지는 0
+        dout : (batch_size, channel, height, width)
+        mask_dout_fold = (batch_size, channel, height, width)
         """
 
         fold = nn.Fold(output_size=(self.x.shape[2],self.x.shape[3]), kernel_size=self.kernel_size, stride=self.stride,
                        padding=self.padding)
-
+        print(dout.shape)
         mask = (self.x_unfold_permute == self.x_unfold_max_values.unsqueeze(-1)).float()
         dout_expand = (dout.view(self.x_unfold_permute.shape[0],self.x_unfold_permute.shape[1],self.x_unfold_permute.shape[2],1)
                        .expand(self.x_unfold_permute.shape))
