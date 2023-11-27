@@ -58,7 +58,6 @@ class MaxPooling:
 
         fold = nn.Fold(output_size=(self.x.shape[2],self.x.shape[3]), kernel_size=self.kernel_size, stride=self.stride,
                        padding=self.padding)
-        print(dout.shape)
         mask = (self.x_unfold_permute == self.x_unfold_max_values.unsqueeze(-1)).float()
         dout_expand = (dout.view(self.x_unfold_permute.shape[0],self.x_unfold_permute.shape[1],self.x_unfold_permute.shape[2],1)
                        .expand(self.x_unfold_permute.shape))
