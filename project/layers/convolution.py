@@ -73,15 +73,15 @@ class Convolution(Module):
         out_w = int(1 + (width + 2 * self.padding - filter_width) / self.stride)
 
         unfold = Unfold(kernel_size=(filter_height, filter_width), padding=self.padding, stride=self.stride)
-        x_im2col = unfold(x).permute(0, 2, 1)
-        w_im2col = self.weight.view(filter_number, -1).T
+        x_im2col = unfold(x).permute(0, 2, 1)  # (batch_size, height * width , channel * filter_height * filter_width)
+        w_im2col = self.weight.view(filter_number, -1).T  # (channel * filter_height * filter_width, filter_number)
 
         self.x = x
         self.x_im2col = x_im2col
         self.w_im2col = w_im2col
 
-        out = torch.matmul(x_im2col, w_im2col) + self.bias.permute(2, 1, 0)
-        out = out.view(batch_size, out_h, out_w, -1).permute(0, 3, 1, 2)
+        out = torch.matmul(x_im2col, w_im2col) + self.bias.permute(2, 1, 0)  # (batch_size, height * width, filter_number)
+        out = out.view(batch_size, out_h, out_w, -1).permute(0, 3, 1, 2)  # (batch_size, filter_number, out_h, out_w)
         return out
 
     def backward(self, dout: Tensor) -> Tensor:
@@ -91,19 +91,21 @@ class Convolution(Module):
         :return: Tensor(batch_size, in_channels, height, width)
         """
         filter_number, channel, filter_height, filter_width = self.weight.shape
-        dout = dout.permute(0, 2, 3, 1).reshape(-1, filter_number)
+        dout = dout.permute(0, 2, 3, 1).reshape(-1, filter_number)  # (batch_size, out_h, out_w, filter_number)
 
-        self.bias.grad = torch.reshape(torch.sum(dout, dim=0), (torch.sum(dout, dim=0).size(0), 1, 1))
+        self.bias.grad = torch.reshape(torch.sum(dout, dim=0),
+                                       (torch.sum(dout, dim=0).size(0), 1, 1))
 
         reshape_col = self.x_im2col.reshape(-1, channel * filter_height * filter_width)
         mul = torch.matmul(reshape_col.T, dout)
-        self.weight.grad = mul.permute(1, 0).view(filter_number, channel, filter_height, filter_width)
+        self.weight.grad = (mul.permute(1, 0)
+                            .view(filter_number, channel, filter_height, filter_width))
 
-        col = torch.matmul(dout, self.w_im2col.T)
-        col = col.view(self.x_im2col.shape).permute(0, 2, 1)
+        col = torch.matmul(dout, self.w_im2col.T)  # (batch_size * out_h * out_w, channel * filter_height * filter_width)
+        col = col.view(self.x_im2col.shape).permute(0, 2, 1)  # (batch_size, channel * filter_height * filter_width, height * width)
 
         batch_size, channel, height, width = self.x.shape
         fold = Fold(output_size=(height, width), kernel_size=(filter_height, filter_width),
                     padding=self.padding, stride=self.stride)
-        dx = fold(col)
+        dx = fold(col)  # (batch_size, channel, height, width)
         return dx
