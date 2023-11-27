@@ -36,13 +36,13 @@ if __name__ == "__main__":
 
     resize = ResizeImage(size = size, transform=ToTensor(), resize_type='expand')
 
-    train_data = CustomDataset(annotations_file="train_data.csv",
+    train_data = CustomDataset(annotations_file="csv/train_data.csv",
                                img_dir="dataset/garbage_classification",
                                label_size=label_size,
                                transform=resize,
                                target_transform=one_hot_encode)
 
-    test_data = CustomDataset(annotations_file="test_data.csv",
+    test_data = CustomDataset(annotations_file="csv/test_data.csv",
                               img_dir="dataset/garbage_classification",
                               label_size=label_size,
                               transform=resize,

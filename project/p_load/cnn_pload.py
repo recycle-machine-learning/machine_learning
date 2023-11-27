@@ -1,5 +1,5 @@
 import torch.nn as nn
-from model_parameter import *
+from project.p_load.model_parameter import *
 from layers import *
 from p_load import convolution_pload
 from p_load import affine_pload

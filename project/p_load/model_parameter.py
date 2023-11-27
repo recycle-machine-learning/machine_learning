@@ -26,7 +26,7 @@ class model_parameter:
 
 
     def load_parameters(self,p_name, shape):
-        df = pd.read_csv("parameters.csv")
+        df = pd.read_csv("../parameters.csv")
         df = df.transpose()
 
         columns = df.loc['Unnamed: 0']
@@ -41,7 +41,7 @@ class model_parameter:
 
     def load_h_parameters(self,p_name):
         np.set_printoptions(precision=6, suppress=True)
-        df = pd.read_csv("parameters.csv")
+        df = pd.read_csv("../parameters.csv")
         df = df.transpose()
 
         columns = df.loc['Unnamed: 0']
