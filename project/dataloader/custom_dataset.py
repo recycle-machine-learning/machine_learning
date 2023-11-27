@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 
 
 class CustomDataset(Dataset):
-    def __init__(self, annotations_file, img_dir, transform=None, target_transform=None):
+    def __init__(self, annotations_file, img_dir, label_size, transform=None, target_transform=None):
         """
         :param annotations_file: 이미지 정보를 저장한 csv 파일
         :param img_dir: 이미지 경로
@@ -15,6 +15,7 @@ class CustomDataset(Dataset):
         """
         self.img_labels = pd.read_csv(annotations_file)
         self.img_dir = img_dir
+        self.label_size = label_size
         self.transform = transform
         self.target_transform = target_transform
 
@@ -33,5 +34,5 @@ class CustomDataset(Dataset):
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
-            label = self.target_transform(label)
+            label = self.target_transform(label, self.label_size)
         return image, label

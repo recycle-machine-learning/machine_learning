@@ -13,6 +13,7 @@ from backward import Backward
 from model_parameter import *
 
 with torch.no_grad():
+# if True:
     if __name__ == "__main__":
         epochs = 10
         learning_rate = 0.00005
@@ -27,23 +28,27 @@ with torch.no_grad():
         print(device)
 
         start = time.time()
+        load_start = time.time()
 
-        model = CNN(size, out_channel1, out_channel2).to(device)
+        class_length = save_csv()
+        label_size = len(class_length)
+
+        model = CNN(size, out_channel1, out_channel2, label_size).to(device)
         criterion = SoftmaxCrossEntropyLoss()
         optimizer = Adam(model.parameters(), lr=learning_rate)
 
-        load_start = time.time()
-        class_length = save_csv()
 
         resize = ResizeImage(size=size, transform=ToTensor(), resize_type='expand')
 
         train_data = CustomDataset(annotations_file="train_data.csv",
                                    img_dir="dataset/garbage_classification",
+                                   label_size=label_size,
                                    transform=resize,
                                    target_transform=one_hot_encode)
 
         test_data = CustomDataset(annotations_file="test_data.csv",
                                   img_dir="dataset/garbage_classification",
+                                  label_size=label_size,
                                   transform=resize,
                                   target_transform=one_hot_encode)
 
@@ -79,6 +84,7 @@ with torch.no_grad():
 
                 backward = Backward(model)
                 backward.backward(criterion.backward())
+                # cost.backward()
 
                 optimizer.step()
 
@@ -94,8 +100,8 @@ with torch.no_grad():
             print("\r[Epoch: {:>4}] cost = {:>.9}".format(epoch + 1, avg_cost / train_total))
             print("Train Accuracy: {0:.3f} %".format(accuracy))
 
-            test_num = torch.zeros(12)
-            test_correct = torch.zeros(12)
+            test_num = torch.zeros(label_size)
+            test_correct = torch.zeros(label_size)
             test_complete = 0
             test_total = test_data.__len__()
 
@@ -148,7 +154,7 @@ with torch.no_grad():
         plt.xlabel('Epoch')
         plt.ylabel('Accuracy')
         plt.text(0, min(min(test_accuracy_list), min(train_accuracy_list)) + 1,
-                 "isTorch = False\n" +
+                 "isTorch = False, isWeighted = {0}\n".format(isWeighted) +
                  "size = {0}, out_channel = {1}, {2}, lr = {3:f}"
                  .format(size, out_channel1, out_channel2, learning_rate))
         plt.show()

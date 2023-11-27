@@ -15,8 +15,7 @@ class Momentum(Optimizer):
         self.v = [torch.zeros_like(param) for param in self.params]
 
     def step(self) -> None:
-        with torch.autograd.no_grad():
-            for i, param in enumerate(self.params):
-                # 가속도 개념 도입
-                self.v[i] = self.momentum * self.v[i] - self.lr * param.grad
-                param.data += self.v[i]
+        for i, param in enumerate(self.params):
+            # 가속도 개념 도입
+            self.v[i] = self.momentum * self.v[i] - self.lr * param.grad
+            param.data += self.v[i]
