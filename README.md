@@ -6,3 +6,4 @@
 
 ## DataSet 다운로드 링크
 [dataset](https://www.kaggle.com/datasets/mostafaabla/garbage-classification)
+파일 경로: project/dataset/garbage_classfication/[class]
