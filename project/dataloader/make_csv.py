@@ -61,10 +61,10 @@ def save_csv(img_dir="dataset/garbage_classification", ratio=None) -> np.ndarray
             "label": test_label_list}
 
     df1 = pd.DataFrame(train)
-    df1.to_csv("train_data.csv", index=False)
+    df1.to_csv("csv/train_data.csv", index=False)
 
     df2 = pd.DataFrame(test)
-    df2.to_csv("test_data.csv", index=False)
+    df2.to_csv("csv/test_data.csv", index=False)
 
     return class_length_list
 

@@ -9,8 +9,8 @@ from dataloader import CustomDataset, CustomDataLoader, save_csv
 from util import ResizeImage, one_hot_encode, make_weights
 from layers import SoftmaxCrossEntropyLoss
 from optimizer import *
-from backward import Backward
-from model_parameter import *
+from project.layers.backward import Backward
+from project.p_load.model_parameter import *
 
 with torch.no_grad():
 # if True:
@@ -40,13 +40,13 @@ with torch.no_grad():
 
         resize = ResizeImage(size=size, transform=ToTensor(), resize_type='expand')
 
-        train_data = CustomDataset(annotations_file="train_data.csv",
+        train_data = CustomDataset(annotations_file="csv/train_data.csv",
                                    img_dir="dataset/garbage_classification",
                                    label_size=label_size,
                                    transform=resize,
                                    target_transform=one_hot_encode)
 
-        test_data = CustomDataset(annotations_file="test_data.csv",
+        test_data = CustomDataset(annotations_file="csv/test_data.csv",
                                   img_dir="dataset/garbage_classification",
                                   label_size=label_size,
                                   transform=resize,
@@ -67,6 +67,7 @@ with torch.no_grad():
         test_accuracy_list = []
 
         for epoch in range(epochs):
+            model.train()
             print("[Epoch: {:>4}] {:0.5g} %".format(epoch + 1, 0.), end="")
 
             avg_cost = 0

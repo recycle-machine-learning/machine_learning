@@ -42,3 +42,12 @@ class CNN(nn.Module):
         out = self.fc1.forward(out)
 
         return out
+    
+    def train(self):
+        self.bn1.is_training = True
+        self.bn2.is_training = True
+    
+    def eval(self):
+        self.bn1.is_training = False
+        self.bn2.is_training = False
+        

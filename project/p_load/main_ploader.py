@@ -37,13 +37,13 @@ with torch.no_grad():
 
         resize = ResizeImage(size=size, transform=ToTensor(), resize_type='expand')
 
-        train_data = CustomDataset(annotations_file="train_data.csv",
-                                   img_dir="dataset/garbage_classification",
+        train_data = CustomDataset(annotations_file="../train_data.csv",
+                                   img_dir="../dataset/garbage_classification",
                                    transform=resize,
                                    target_transform=one_hot_encode)
 
-        test_data = CustomDataset(annotations_file="test_data.csv",
-                                  img_dir="dataset/garbage_classification",
+        test_data = CustomDataset(annotations_file="../test_data.csv",
+                                  img_dir="../dataset/garbage_classification",
                                   transform=resize,
                                   target_transform=one_hot_encode)
 

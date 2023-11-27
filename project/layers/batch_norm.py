@@ -36,22 +36,24 @@ class BatchNormalization(Module):
         self.weight.grad = None
         self.bias.grad = None
 
+        self.is_training = True
+
     def reset_parameters(self) -> None:
         if self.affine:
             init.ones_(self.weight)
             init.zeros_(self.bias)
 
-    def forward(self, x, is_training=True):
+    def forward(self, x):
         batch_size, channel, height, width = x.shape
-        self.input_shape = x.shape
 
+        self.input_shape = x.shape
         self.batch_size = batch_size
 
         if self.running_mean is None:
             self.running_mean = torch.zeros(channel)
             self.running_var = torch.zeros(channel)
 
-        if is_training:
+        if self.is_training:
             mean = torch.mean(x, dim=(0, 2, 3))
             mean_view = mean.view(1, -1, 1, 1)  # 평균 (1,)
             xc = x - mean_view  # 평균을 0으로 (batch_size, channel * height * width)
@@ -66,13 +68,13 @@ class BatchNormalization(Module):
             self.running_mean = self.momentum * self.running_mean + (1 - self.momentum) * mean
             self.running_var = self.momentum * self.running_var + (1 - self.momentum) * var
         else:
-            xc = x - self.running_mean
-            x_norm = xc / (torch.sqrt(self.running_var + self.epsilon))
+            xc = x - self.running_mean.view(1, -1, 1, 1)
+            x_norm = xc / (torch.sqrt(self.running_var.view(1, -1, 1, 1) + self.epsilon))
 
         x_norm = x_norm.view(*self.input_shape)
 
-        weight = self.weight.view((1, -1, 1, 1))
-        bias = self.bias.view((1, -1, 1, 1))
+        weight = self.weight.view(1, -1, 1, 1)
+        bias = self.bias.view(1, -1, 1, 1)
 
         out = weight * x_norm + bias
 
